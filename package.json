@@ -1,0 +1,20 @@
+{
+  "name": "JavaScript Games",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lil-gui": "^0.19.2",
+    "vite": "^5.3.4"
+  },
+  "devDependencies": {
+    "mocha": "^11.0.1"
+  }
+}
