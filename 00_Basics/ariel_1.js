@@ -131,6 +131,14 @@ function positives(data) {
     return result;
 }
 
+function addList(data) {
+    let result = 0;
+    for(const item of data) {
+        result += item;
+    }
+    return result;
+}
+
 export {
     fahrenheitToCelsius,
     roots,
@@ -142,4 +150,5 @@ export {
     duplicate,
     enlist,
     positives,
+    addList,
 };
