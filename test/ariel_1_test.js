@@ -10,6 +10,7 @@ import {
     duplicate,
     enlist,
     positives,
+    addList,
 } from "../00_Basics/ariel_1.js";
 
 describe("Ariel1 Module Tests", () => {
@@ -195,6 +196,20 @@ describe("Ariel1 Module Tests", () => {
             deepStrictEqual(
                 positives([6, 2, 9, 13]),
                 [6, 2, 9, 13]);
+        });
+    });
+
+    describe("addList", () => {
+        it("empty list", () => {
+            strictEqual(addList([]), 0);
+        });
+
+        it("small list", () => {
+            strictEqual(addList([2, 4, 1, 3]), 10);
+        });
+
+        it("larger list", () => {
+            strictEqual(addList([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 55);
         });
     });
 });
