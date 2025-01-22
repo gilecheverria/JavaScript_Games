@@ -8,17 +8,17 @@
 
 // Simple functions
 
-function fahrenheitToCelsius(temp) {
+export function fahrenheitToCelsius(temp) {
     return (temp - 32) * 5 / 9;
 }
 
-function roots(a, b, c) {
+export function roots(a, b, c) {
     return (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
 }
 
 // Conditionals
 
-function sign(number) {
+export function sign(number) {
     if (number == 0) {
         return 0;
     } else if (number > 0) {
@@ -28,7 +28,7 @@ function sign(number) {
     }
 }
 
-function bmi(weight, height) {
+export function bmi(weight, height) {
     let bmi = weight / (height * height);
     if (bmi < 20) {
         return "underweight";
@@ -45,11 +45,11 @@ function bmi(weight, height) {
 
 // Recursion
 
-function factorial(n) {
+export function factorial(n) {
     return tailFactorial(n, 1);
 }
 
-function tailFactorial(n, a) {
+export function tailFactorial(n, a) {
     if (n == 0) {
         return a;
     } else {
@@ -57,11 +57,11 @@ function tailFactorial(n, a) {
     }
 }
 
-function pow(n, p) {
+export function pow(n, p) {
     return tailPow(n, p, 1);
 }
 
-function tailPow(n, p, a) {
+export function tailPow(n, p, a) {
     if (p == 0) {
         return a;
     } else {
@@ -70,7 +70,7 @@ function tailPow(n, p, a) {
 }
 
 /*
-function fib(n) {
+export function fib(n) {
     if (n < 2) {
         return n;
     } else {
@@ -87,7 +87,7 @@ function tailFib(n, a, b) {
 }
 */
 
-function fib(n) {
+export function fib(n) {
     if (n < 2) {
         return n;
     }
@@ -104,8 +104,8 @@ function fib(n) {
 
 // Lists
 
-function duplicate(data) {
-    let result = [];
+export function duplicate(data) {
+    const result = [];
     for(const item of data) {
         result.push(item);
         result.push(item);
@@ -113,16 +113,16 @@ function duplicate(data) {
     return result;
 }
 
-function enlist(data) {
-    let result = [];
+export function enlist(data) {
+    const result = [];
     for(const item of data) {
         result.push([item]);
     }
     return result;
 }
 
-function positives(data) {
-    let result = [];
+export function positives(data) {
+    const result = [];
     for(const item of data) {
         if (item > 0) {
             result.push(item);
@@ -131,7 +131,7 @@ function positives(data) {
     return result;
 }
 
-function addList(data) {
+export function addList(data) {
     let result = 0;
     for(const item of data) {
         result += item;
@@ -139,16 +139,77 @@ function addList(data) {
     return result;
 }
 
-export {
-    fahrenheitToCelsius,
-    roots,
-    sign,
-    bmi,
-    factorial,
-    pow,
-    fib,
-    duplicate,
-    enlist,
-    positives,
-    addList,
-};
+export function invertPairs(data) {
+    const result = [];
+    for(const pair of data) {
+        result.push([pair[1], pair[0]]);
+    }
+    return result;
+}
+
+export function swapper(data, a, b) {
+    const result = [];
+    for(const item of data) {
+        if (item === a) {
+            result.push(b);
+        } else if (item === b) {
+            result.push(a);
+        } else {
+            result.push(item);
+        }
+    }
+    return result;
+}
+
+export function dotProduct(data1, data2) {
+    let result = 0;
+    for(const i in data1) {
+        result += data1[i] * data2[i];
+    }
+    return result;
+}
+
+export function average(data) {
+    return (data.length === 0) ? 0 : addList(data) / data.length;
+}
+
+export function stdDev(data) {
+    if (data.length === 0) {
+        return 0;
+    }
+    const mean = average(data);
+    const total = data.reduce((accum, item) => {
+        return accum + (item - mean) ** 2 }, 0);
+    return Math.sqrt(total / data.length);
+}
+
+export function replic(times, data) {
+    const result = [];
+    for (const item of data) {
+        for (let i=0; i<times; i++) {
+            result.push(item);
+        }
+    }
+    return result;
+}
+
+export function expand(data) {
+    const result = [];
+    let times = 1;
+    for (const item of data) {
+        for (let i=0; i<times; i++) {
+            result.push(item);
+        }
+        times++;
+    }
+    return result;
+}
+
+export function binary(num) {
+    const result = [];
+    while(num > 0) {
+        result.push(num % 2);
+        num = Math.floor(num / 2);
+    }
+    return result.reverse();
+}
