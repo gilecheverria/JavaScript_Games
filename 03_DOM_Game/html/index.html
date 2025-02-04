@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DOM platformer</title>
+        <style>
+        canvas {
+            border: 2px solid black;
+            background-color: #87ceeb;
+        }
+        </style>
+        <link rel="stylesheet" href="../css/style.css">
+        <script src="../js/game_classes.js"></script>
+        <script src="../js/dom_display.js"></script>
+    </head>
+
+    <body>
+        <div id="headerContainer">
+            <h1>DOM platformer</h1>
+        </div>
+        <script>
+            runGame(GAME_LEVELS, DOMDisplay);
+        </script>
+        <!--<canvas id="canvas"></canvas>-->
+        <a href="/">
+            <button id="backButton">Back</button>
+        </a>
+    </body>
+</html>
