@@ -7,6 +7,8 @@
  * 2025-01-13
  */
 
+"use strict";
+
 const canvasWidth = 600;
 const canvasHeight = 400;
 
@@ -26,20 +28,36 @@ let block;
 let scoreLabel;
 let difficultyLabel;
 
-class Player {
-    constructor(width, height, x) {
+class GameObject {
+    constructor(color, width, height, x) {
+        this.color = color;
         this.width = width;
         this.height = height;
         this.x = x;
         const ground = canvasHeight - this.height;
         this.y = ground;
+    }
+
+    draw() {
+        ctx.fillStyle = color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+
+    move() {
+
+    }
+}
+
+class Player extends GameObject {
+    constructor(width, height, x) {
+        super("green", width, height, x);
 
         this.isJumping = false;
         this.yVelocity = 0;
     } 
 
     draw() {
-        ctx.fillStyle = "green";
+        ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
@@ -68,18 +86,14 @@ class Player {
     }
 }
 
-class Block {
+class Block extends GameObject {
     constructor() {
-        this.width = 30;
-        this.height = randomInt(50, 300);
-        this.x = 800;
-        const ground = canvasHeight - this.height;
-        this.y = ground;
+        super("red", 30, randomInt(50, 300), 800);
         this.blockSpeed = randomInt(minBlockSpeed, maxBlockSpeed);
     }
 
     draw() {
-        ctx.fillStyle = "red";
+        ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
@@ -101,14 +115,14 @@ class Block {
     }
 
     addPoint() {
-            // Add a point for each block that reaches the end without
-            // hitting the player
-            score += 1;
-            if (score > 0 && score % 5 == 0) {
-                level += 1;
-                minBlockSpeed += 0.5;
-                maxBlockSpeed += 1;
-            }
+        // Add a point for each block that reaches the end without
+        // hitting the player
+        score += 1;
+        if (score > 0 && score % 5 == 0) {
+            level += 1;
+            minBlockSpeed += 0.5;
+            maxBlockSpeed += 1;
+        }
     }   
 }
 
