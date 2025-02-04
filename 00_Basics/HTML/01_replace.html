@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Simple test page</title>
+    </head>
+
+    <body>
+        <p>The <img src="img/cat.png" alt="Cat"> in the
+            <img src="img/hat.png" alt="Hat">.</p>
+
+        <p><button onclick="replaceImages()">Replace</button></p>
+
+        <ol>
+        </ol>
+
+        <p><button onclick="makeList()">Make list</button></p>
+
+        <script>
+        function replaceImages() {
+            let images = document.body.getElementsByTagName("img");
+            for (let i = images.length - 1; i >= 0; i--) {
+                let image = images[i];
+                if (image.alt) {
+                    let text = document.createTextNode(image.alt);
+                    image.parentNode.replaceChild(text, image);
+                }
+            }
+        }
+
+        function makeList() {
+            let list = document.body.getElementsByTagName("ol")[0];
+            let items = ['one', 'two', 'three', 'four'];
+            for (let item of items) {
+                let elem = document.createElement('li');
+                let text = document.createTextNode(item);
+                elem.appendChild(text);
+                list.appendChild(elem);
+            }
+        }
+        </script>
+
+    </body>
+</html>

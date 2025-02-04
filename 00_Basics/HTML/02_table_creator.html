@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Simple test page</title>
+    </head>
+
+    <body>
+        <h1>Mountains</h1>
+
+        <div id="mountains"></div>
+
+        <script>
+        const MOUNTAINS = [
+            {name: "Kilimanjaro", height: 5895, place: "Tanzania"},
+            {name: "Everest", height: 8848, place: "Nepal"},
+            {name: "Mount Fuji", height: 3776, place: "Japan"},
+            {name: "Vaalserberg", height: 323, place: "Netherlands"},
+            {name: "Denali", height: 6168, place: "United States"},
+            {name: "Popocatepetl", height: 5465, place: "Mexico"},
+            {name: "Mont Blanc", height: 4808, place: "Italy/France"}
+        ];
+
+        function makeRow(items, type) {
+            let row = document.createElement("tr");
+            for (let item of items) {
+                row.appendChild(makeCell(item, type));
+            }
+            return row;
+        }
+
+        function makeCell(content, type) {
+            let cell = document.createElement(type);
+            let text = document.createTextNode(content);
+            cell.appendChild(text);
+            cell.setAttribute('padding', '20px');
+            return cell;
+        }
+
+        function makeTable(data) {
+            // Your code here
+            let div = document.getElementById("mountains");
+            let table = document.createElement("table");
+            table.setAttribute('padding', '20px');
+            table.setAttribute('border', '2px');
+            let row = makeRow(['Name', 'Height', 'Place'], "th");
+            table.appendChild(row);
+            for (let {name, height, place} of data) {
+                // console.log(`${name}, ${height}, ${place}`);
+                let row = makeRow([name, height, place], "td");
+                table.appendChild(row);
+            }
+            div.appendChild(table);
+        }
+
+        makeTable(MOUNTAINS);
+        </script>
+
+    </body>
+</html>
