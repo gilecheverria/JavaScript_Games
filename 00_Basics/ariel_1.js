@@ -6,6 +6,8 @@
  * 2025-01-13
  */
 
+"use strict";
+
 // Simple functions
 
 export function fahrenheitToCelsius(temp) {
@@ -178,8 +180,9 @@ export function stdDev(data) {
         return 0;
     }
     const mean = average(data);
-    const total = data.reduce((accum, item) => {
-        return accum + (item - mean) ** 2 }, 0);
+    //const total = data.reduce((accum, item) => {
+    //    return accum + (item - mean) ** 2 }, 0);
+    const total = data.reduce((accum, item) => accum + (item - mean) ** 2, 0);
     return Math.sqrt(total / data.length);
 }
 

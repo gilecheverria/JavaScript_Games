@@ -6,6 +6,8 @@
  * 2025-01-20
  */
 
+"use strict";
+
 export function insert(list, newItem) {
     if (list.length === 0) {
         return [newItem];
@@ -37,7 +39,8 @@ export function rotateLeft(list, positions) {
     }
 
     // Make a copy of the original list
-    let result = list.map((item) => { return item; });
+    //let result = list.map((item) => item);
+    let result = list.slice();
     for (let i=0; i<positions; i++) {
         const item = result.shift();
         result.push(item);
@@ -93,7 +96,7 @@ export function insertAt(data, position, item) {
     // Advance until the required position
     const result = [];
     // Copy the original Array
-    const temp = data.map((item) => { return item; });
+    const temp = data.slice();
     for (let i=0; i<position && i<len; i++) {
         result.push(temp.shift());
     }
@@ -190,7 +193,8 @@ export function decode(data) {
 }
 
 export function argsSwap(func) {
-    return (a, b) => { return func(b, a); };
+    //return (a, b) => { return func(b, a); };
+    return (a, b) => func(b, a);
 }
 
 export function thereExistsOne(func, data) {

@@ -5,6 +5,8 @@
  * 2025-01-20
  */
 
+"use strict";
+
 import { strictEqual, deepStrictEqual } from "assert";
 import * as ariel_1 from "../00_Basics/ariel_1.js";
 

@@ -5,6 +5,8 @@
  * 2025-01-20
  */
 
+"use strict";
+
 import { strictEqual, deepStrictEqual } from "assert";
 import * as ariel_2 from "../00_Basics/ariel_2.js";
 
@@ -462,23 +464,23 @@ describe("ariel_2 Module Tests", () => {
         });
 
         it("Custom function to divide a number by another", () => {
-            deepStrictEqual(ariel_2.argsSwap((a, b) => { return a / b; })(8, 2), 0.25);
+            deepStrictEqual(ariel_2.argsSwap((a, b) => a / b)(8, 2), 0.25);
         });
     });
 
     describe("thereExistsOne", () => {
 
         it("positive function on an empty list", () => {
-            deepStrictEqual(ariel_2.thereExistsOne((x) => { return x >= 0; }, []), false);
+            deepStrictEqual(ariel_2.thereExistsOne(x => x >= 0, []), false);
         });
         it("positive function with one positive", () => {
-            deepStrictEqual(ariel_2.thereExistsOne((x) => { return x >= 0; }, [-1, -10, 4, -5, -2, -1]), true);
+            deepStrictEqual(ariel_2.thereExistsOne(x => x >= 0, [-1, -10, 4, -5, -2, -1]), true);
         });
         it("positive function with many positives", () => {
-            deepStrictEqual(ariel_2.thereExistsOne((x) => { return x >= 0; }, [-1, -10, 4, -5, 2, -1]), false);
+            deepStrictEqual(ariel_2.thereExistsOne(x => x >= 0, [-1, -10, 4, -5, 2, -1]), false);
         });
         it("negative function with one negative", () => {
-            deepStrictEqual(ariel_2.thereExistsOne((x) => { return x < 0; }, [-1]), true);
+            deepStrictEqual(ariel_2.thereExistsOne(x => x < 0, [-1]), true);
         });
         it("isNan function with no NaN", () => {
             deepStrictEqual(ariel_2.thereExistsOne(isNaN, [4, 8, 15, 16, 23, 42]), false);
@@ -492,7 +494,7 @@ describe("ariel_2 Module Tests", () => {
 
         it("empty list", () => {
             deepStrictEqual(
-                ariel_2.linearSearch([], 5, (a, b) => { return a === b; }),
+                ariel_2.linearSearch([], 5, (a, b) => a === b),
                 false);
         });
 
@@ -501,7 +503,7 @@ describe("ariel_2 Module Tests", () => {
                 ariel_2.linearSearch(
                     [48, 77, 30, 31, 5, 20, 91, 92, 69, 97, 28, 32, 17, 18, 96],
                     5,
-                    (a, b) => { return a === b; }),
+                    (a, b) => a === b),
                 4);
         });
 
@@ -510,7 +512,7 @@ describe("ariel_2 Module Tests", () => {
                 ariel_2.linearSearch(
                     ["red", "blue", "green", "black", "white"],
                     "black",
-                    (a, b) => { return a === b; }),
+                    (a, b) => a === b),
                 3);
         });
 
@@ -519,13 +521,13 @@ describe("ariel_2 Module Tests", () => {
                 ariel_2.linearSearch(
                     ["terminal", "keyboard", "mouse", "monitor"],
                     "ous",
-                    (a, b) => { return a.includes(b); }
-                ), 2);
+                    (a, b) => a.includes(b)),
+                2);
         });
     });
 
     describe("deriv", () => {
-        const f = (x) => { return x ** 3; };
+        const f = x => x ** 3;
         const df = ariel_2.deriv(f, 0.001);
         const ddf = ariel_2.deriv(df, 0.001);
         const dddf = ariel_2.deriv(ddf, 0.001);
