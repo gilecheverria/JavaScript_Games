@@ -39,7 +39,7 @@ class GameObject {
     }
 
     draw() {
-        ctx.fillStyle = color;
+        ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
@@ -54,7 +54,7 @@ class Player extends GameObject {
 
         this.isJumping = false;
         this.yVelocity = 0;
-    } 
+    }
 
     draw() {
         ctx.fillStyle = this.color;
@@ -123,7 +123,7 @@ class Block extends GameObject {
             minBlockSpeed += 0.5;
             maxBlockSpeed += 1;
         }
-    }   
+    }
 }
 
 class TextLabel {
