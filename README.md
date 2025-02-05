@@ -6,6 +6,7 @@ Test games done using JavaScript
 ## Learning JavaScript
 
 - https://learnjavascript.online/
+- https://eloquentjavascript.net/
 
 ### Using Mocha for unit testing
 - https://mochajs.org/
@@ -21,6 +22,13 @@ To run individual files, from the root directory:
 npm test test/<test_file>
 ```
 
+## Game engines in JavaScript
+- https://phaser.io/
+
+
+## Examples
+- https://www.lessmilk.com/
+- https://eloquentjavascript.net/16_game.html
 
 
 ## Notes:
