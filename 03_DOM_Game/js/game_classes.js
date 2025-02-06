@@ -30,4 +30,4 @@ class Vec {
     }
 }
 
-console.log(new Vec(4, 3).length);
+//console.log(new Vec(4, 3).length);
