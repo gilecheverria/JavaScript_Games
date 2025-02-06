@@ -1,9 +1,8 @@
 /*
- * Simple platformer game
- * Based on the example at:
+ * Simple clone of Pong
  *
  * Gilberto Echeverria
- * 2025-01-22
+ * 2025-02-05
  */
 
 "use strict";
@@ -13,6 +12,9 @@ const canvasWidth = 600;
 const canvasHeight = 400;
 
 let ctx;
+
+let frameStart;
+let elapsed;
 
 let paddleLeft;
 let paddleRight;
@@ -25,9 +27,6 @@ let paddleSpeed = 0.5;
 let initalBallSpeed = 0.2;
 let ballSpeed = 0.0;
 let speedIncrement = 0.05;
-
-let frameStart;
-let elapsed;
 
 let pointsLeft = 0;
 let pointsRight = 0;
