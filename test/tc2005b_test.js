@@ -1,5 +1,7 @@
 /*
  * Unit tests for the functions used to practice JavaScript in TC2005B
+ * Using the Mocha testing framework
+ * https://mochajs.org/
  *
  * Gilberto Echeverria
  * 2025-02-10
