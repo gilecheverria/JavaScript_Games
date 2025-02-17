@@ -78,6 +78,7 @@ class Game {
                     let actor = new type("grey", scale, scale, x * scale, y * scale, "obstacle");
                     if (actor instanceof Player) {
                         this.player = actor;
+                        this.player.setSprite('../assets/sprites/link_front.png');
                     } else if (actor instanceof Coin) {
                         this.actors.push(actor);
                     } else {

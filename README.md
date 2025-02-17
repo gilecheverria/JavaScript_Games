@@ -34,3 +34,9 @@ npm test test/<test_file>
 ## Notes:
 
 - Using for..in with an Array will return the indices as strings.
+
+
+## Game techniques
+
+- Sprite animation: https://www.youtube.com/watch?v=1bj7g6sXit8
+

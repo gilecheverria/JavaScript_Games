@@ -37,11 +37,21 @@ class GameObject {
         this.size = new Vec(width, height);
         this.color = color;
         this.type = type;
+        this.spriteImage = undefined;
+    }
+
+    setSprite(imagePath) {
+        this.spriteImage = new Image();
+        this.spriteImage.src = imagePath;
     }
 
     draw() {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.position.x, this.position.y, this.size.x, this.size.y);
+        if (this.spriteImage) {
+            ctx.drawImage(this.spriteImage, this.position.x, this.position.y, this.size.x, this.size.y);
+        } else {
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.position.x, this.position.y, this.size.x, this.size.y);
+        }
     }
 
     move() {
