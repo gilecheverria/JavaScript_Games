@@ -31,6 +31,10 @@ npm test test/<test_file>
 - https://eloquentjavascript.net/16_game.html
 
 
+## Canvas documentation
+- https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
+
+
 ## Notes:
 
 - Using for..in with an Array will return the indices as strings.
