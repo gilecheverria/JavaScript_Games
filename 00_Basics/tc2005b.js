@@ -136,7 +136,7 @@ export function findShortestString(strings) {
 }
 
 export function isPalindrome(string) {
-    const limit = Math.floor(string.size / 2);
+    const limit = Math.floor(string.length / 2);
     for (let i=0; i<limit; i++) {
         if (string[i] !== string.at(-(i + 1))) {
             return false;

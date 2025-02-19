@@ -240,7 +240,7 @@ describe("TC2005B Module Tests", () => {
         });
 
         it("two char string, no", () => {
-            strictEqual(tc2005b.isPalindrome("un"), true);
+            strictEqual(tc2005b.isPalindrome("un"), false);
         });
 
         it("multiple char string, yes", () => {
@@ -248,7 +248,7 @@ describe("TC2005B Module Tests", () => {
         });
 
         it("multiple char string, no", () => {
-            strictEqual(tc2005b.isPalindrome("rizuzri"), true);
+            strictEqual(tc2005b.isPalindrome("rizuzri"), false);
         });
     });
 
