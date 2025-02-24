@@ -149,7 +149,7 @@ function gameStart() {
     // Register the objects in the game
     game = new Game('playing');
 
-    game.generateLevel(GAME_LEVELS[0]);
+    game.generateLevel(GAME_LEVELS[1]);
 
     setEventListeners();
 
