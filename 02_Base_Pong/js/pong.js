@@ -13,8 +13,7 @@ const canvasHeight = 400;
 
 let ctx;
 
-let frameStart;
-let elapsed;
+let oldTime;
 
 let paddleLeft;
 let paddleRight;
@@ -38,8 +37,8 @@ class Paddle extends GameObject {
         this.velocity = new Vec(0.0, 0.0);
     }
 
-    move() {
-        this.position = this.position.plus(this.velocity.times(elapsed));
+    update(deltaTime) {
+        this.position = this.position.plus(this.velocity.times(deltaTime));
         // Stop motion at the top border
         if (this.position.y < 0) {
             this.position.y = 0;
@@ -65,9 +64,9 @@ class Ball extends GameObject {
         return new Vec(velX, velY);
     }
 
-    move() {
+    update(deltaTime) {
         // Multiply the motion by a factor called ballSpeed
-        this.position = this.position.plus(this.velocity.times(ballSpeed).times(elapsed));
+        this.position = this.position.plus(this.velocity.times(ballSpeed).times(deltaTime));
     }
 }
 
@@ -89,9 +88,9 @@ class Game {
         this.scoreLabel = new TextLabel(canvasWidth*4/10, canvasHeight*8/10);
     }
 
-    update() {
+    update(deltaTime) {
         for (let actor of this.actors) {
-            actor.move();
+            actor.update(deltaTime);
         }
 
         // Detect collisions
@@ -123,12 +122,12 @@ class Game {
         ball.velocity = ball.initVelocity();
     }
 
-    draw() {
+    draw(ctx) {
         for (let actor of this.actors) {
-            actor.draw();
+            actor.draw(ctx);
         }
 
-        scoreLabel.draw(`Score: ${pointsLeft} - ${pointsRight}`);
+        scoreLabel.draw(ctx, `Score: ${pointsLeft} - ${pointsRight}`);
     }
 }
 
@@ -210,18 +209,18 @@ function setEventListeners() {
 }
 
 // Function that will be called for the game loop
-function updateCanvas(frameTime) {
-    if (frameStart === undefined) {
-        frameStart = frameTime;
+function updateCanvas(newTime) {
+    if (oldTime === undefined) {
+        oldTime = newTime;
     }
-    elapsed = frameTime - frameStart;
-    //console.log(`Elapsed: ${elapsed}`);
+    let deltaTime = newTime - oldTime;
+    //console.log(`deltaTime: ${deltaTime}`);
 
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    game.update();
-    game.draw();
+    game.update(deltaTime);
+    game.draw(ctx);
 
-    frameStart = frameTime;
+    oldTime = newTime;
     requestAnimationFrame(updateCanvas);
 }
 

@@ -39,12 +39,12 @@ class GameObject {
         this.type = type;
     }
 
-    draw() {
+    draw(ctx) {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.position.x, this.position.y, this.size.x, this.size.y);
     }
 
-    move() {
+    update() {
 
     }
 }
@@ -65,7 +65,7 @@ class TextLabel {
         this.y = y;
     }
 
-    draw(text) {
+    draw(ctx, text) {
         ctx.font = "25px Ubuntu Mono";
         ctx.fillStyle = "black";
         ctx.fillText(text, this.x, this.y);
