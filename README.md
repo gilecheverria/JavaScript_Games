@@ -26,7 +26,7 @@ npm test test/<test_file>
 - https://phaser.io/
 
 
-## Examples
+## Examples of games in JS
 - https://www.lessmilk.com/
 - https://eloquentjavascript.net/16_game.html
 

@@ -46,16 +46,22 @@ class Level {
 
     // Detect contact with the walls of the level
     touches(pos, size, type) {
+        // Determine the level "cells" that the player is occupying
         let xStart = Math.floor(pos.x);
         let xEnd = Math.ceil(pos.x + size.x);
         let yStart = Math.floor(pos.y);
         let yEnd = Math.ceil(pos.y + size.y);
 
+        // Check each of those cells
         for (let y=yStart; y<yEnd; y++) {
             for (let x=xStart; x<xEnd; x++) {
+                // Anything outside of the bounds of the canvas is considered
+                // to be a wall, so it blocks the player's movement
                 let isOutside = x < 0 || x >= this.width ||
-                    y < 0 || y >= this.height;
+                                y < 0 || y >= this.height;
                 let here = isOutside ? 'wall' : this.rows[y][x];
+                // Check if the player is touching an object
+                // of the type being tested
                 if (here === type) return true;
             }
         }
