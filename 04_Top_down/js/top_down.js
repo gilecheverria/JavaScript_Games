@@ -20,7 +20,7 @@ let game;
 let player;
 let level;
 
-let playerSpeed = 0.05;
+let playerSpeed = 0.005;
 
 // Scale of the whole world, to be applied to all objects
 const scale = 20;
@@ -32,8 +32,18 @@ class Player extends GameObject {
         this.money = 0;
     }
 
-    move() {
-        this.position = this.position.plus(this.velocity.times(elapsed));
+    update(level) {
+        let newPosition = this.position.plus(this.velocity.times(elapsed));
+
+        if (! level.contact(newPosition, this.size, 'wall')) {
+            this.position = newPosition;
+        }
+
+
+
+        /*
+
+        //this.position = this.position.plus(this.velocity.times(elapsed));
         // Stop motion at the top border
         if (this.position.y < 0) {
             this.position.y = 0;
@@ -42,6 +52,7 @@ class Player extends GameObject {
         if (this.position.y > canvasHeight - this.size.y) {
             this.position.y = canvasHeight - this.size.y;
         }
+        */
     }
 }
 
@@ -64,21 +75,25 @@ class Level {
         this.width = rows[0].length;
         this.actors = [];
 
+        // Fill the rows array with a label for the type of element in the cell
+        // Most cells are 'empty', except for the 'wall'
         this.rows = rows.map((row, y) => {
             return row.map((ch, x) => {
                 let type = levelChars[ch];
                 if (typeof type !== "string") {
-                    //let pos = new Vec(x, y);
                     let actor = new type("grey", 1, 1, x, y, "obstacle");
                     if (actor instanceof Player) {
+                        actor.setSprite('../assets/sprites/link_front.png');
                         this.player = actor;
-                        this.player.setSprite('../assets/sprites/link_front.png');
+                        type = "empty";
                     } else if (actor instanceof Coin) {
+                        actor.setSprite('../assets/sprites/coin.png');
                         this.actors.push(actor);
+                        type = "empty";
                     } else {
                         this.actors.push(actor);
+                        type = "wall";
                     }
-                    type = "empty";
                 }
                 return type;
             });
@@ -119,10 +134,10 @@ class Game {
     }
 
     update() {
-        this.player.move();
+        this.player.update(this.level);
 
         for (let actor of this.actors) {
-            actor.move();
+            actor.update();
         }
 
         // Detect collisions

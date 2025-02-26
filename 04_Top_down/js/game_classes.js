@@ -54,7 +54,7 @@ class GameObject {
         }
     }
 
-    move() {
+    update() {
 
     }
 }
@@ -81,5 +81,3 @@ function overlapRectangles(actor1, actor2) {
            actor1.position.y + actor1.size.y > actor2.position.y &&
            actor1.position.y < actor2.position.y + actor2.size.y;
 }
-
-
