@@ -45,17 +45,31 @@ class GameObject {
         this.spriteImage.src = imagePath;
     }
 
-    draw() {
+    draw(ctx, scale) {
         if (this.spriteImage) {
-            ctx.drawImage(this.spriteImage, this.position.x, this.position.y, this.size.x, this.size.y);
+            ctx.drawImage(this.spriteImage, this.position.x * scale, this.position.y * scale, this.size.x * scale, this.size.y * scale);
         } else {
             ctx.fillStyle = this.color;
-            ctx.fillRect(this.position.x, this.position.y, this.size.x, this.size.y);
+            ctx.fillRect(this.position.x * scale, this.position.y * scale, this.size.x * scale, this.size.y * scale);
         }
     }
 
     move() {
 
+    }
+}
+
+
+class TextLabel {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    draw(ctx, text) {
+        ctx.font = "25px Ubuntu Mono";
+        ctx.fillStyle = "black";
+        ctx.fillText(text, this.x, this.y);
     }
 }
 
@@ -69,15 +83,3 @@ function overlapRectangles(actor1, actor2) {
 }
 
 
-class TextLabel {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    draw(text) {
-        ctx.font = "25px Ubuntu Mono";
-        ctx.fillStyle = "black";
-        ctx.fillText(text, this.x, this.y);
-    }
-}

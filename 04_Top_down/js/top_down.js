@@ -20,7 +20,7 @@ let game;
 let player;
 let level;
 
-let playerSpeed = 0.3;
+let playerSpeed = 0.05;
 
 // Scale of the whole world, to be applied to all objects
 const scale = 20;
@@ -57,25 +57,19 @@ class Obstacle extends GameObject {
     }
 }
 
-
-class Game {
-    constructor(state) {
-        this.state = state;
-        this.actors = [];
-        this.player = undefined;
-    }
-
-    generateLevel(plan) {
+class Level {
+    constructor(plan) {
         let rows = plan.trim().split('\n').map(l => [...l]);
         this.height = rows.length;
         this.width = rows[0].length;
+        this.actors = [];
 
         this.rows = rows.map((row, y) => {
             return row.map((ch, x) => {
                 let type = levelChars[ch];
                 if (typeof type !== "string") {
                     //let pos = new Vec(x, y);
-                    let actor = new type("grey", scale, scale, x * scale, y * scale, "obstacle");
+                    let actor = new type("grey", 1, 1, x, y, "obstacle");
                     if (actor instanceof Player) {
                         this.player = actor;
                         this.player.setSprite('../assets/sprites/link_front.png');
@@ -89,7 +83,39 @@ class Game {
                 return type;
             });
         });
+    }
 
+    // Detect when the player touches a wall
+    contact(playerPos, playerSize, type) {
+        // Determine which cells the player is occupying
+        let xStart = Math.floor(playerPos.x);
+        let xEnd = Math.ceil(playerPos.x + playerSize.x);
+        let yStart = Math.floor(playerPos.y);
+        let yEnd = Math.ceil(playerPos.y + playerSize.y);
+
+        // Check each of those cells
+        for (let y=yStart; y<yEnd; y++) {
+            for (let x=xStart; x<xEnd; x++) {
+                // Anything outside of the bounds of the canvas is considered
+                // to be a wall, so it blocks the player's movement
+                let isOutside = x < 0 || x >= this.width ||
+                                y < 0 || y >= this.height;
+                let here = isOutside ? 'wall' : this.rows[y][x];
+                // Detect if an object of type specified is being touched
+                if (here == type) return true;
+            }
+        }
+        return false;
+    }
+}
+
+class Game {
+    constructor(state, level) {
+        this.state = state;
+        this.level = level;
+        this.player = level.player;
+        this.actors = level.actors;
+        //console.log(level);
     }
 
     update() {
@@ -112,10 +138,10 @@ class Game {
         }
     }
 
-    draw() {
-        this.player.draw();
+    draw(ctx, scale) {
+        this.player.draw(ctx, scale);
         for (let actor of this.actors) {
-            actor.draw();
+            actor.draw(ctx, scale);
         }
     }
 }
@@ -147,9 +173,7 @@ function gameStart() {
     // Initialize the game objects
 
     // Register the objects in the game
-    game = new Game('playing');
-
-    game.generateLevel(GAME_LEVELS[1]);
+    game = new Game('playing', new Level(GAME_LEVELS[1]));
 
     setEventListeners();
 
@@ -199,7 +223,7 @@ function updateCanvas(frameTime) {
 
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     game.update();
-    game.draw();
+    game.draw(ctx, scale);
 
     frameStart = frameTime;
     requestAnimationFrame(updateCanvas);
