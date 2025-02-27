@@ -50,24 +50,26 @@ class GameObject {
 }
 
 
+class TextLabel {
+    constructor(x, y, font, color) {
+        this.x = x;
+        this.y = y;
+        this.font = font;
+        this.color = color;
+    }
+
+    draw(ctx, text) {
+        ctx.font = this.font;
+        ctx.fillStyle = this.color;
+        ctx.fillText(text, this.x, this.y);
+    }
+}
+
+
 // Simple collision detection between rectangles
 function overlapRectangles(actor1, actor2) {
     return actor1.position.x + actor1.size.x > actor2.position.x &&
            actor1.position.x < actor2.position.x + actor2.size.x &&
            actor1.position.y + actor1.size.y > actor2.position.y &&
            actor1.position.y < actor2.position.y + actor2.size.y;
-}
-
-
-class TextLabel {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    draw(ctx, text) {
-        ctx.font = "25px Ubuntu Mono";
-        ctx.fillStyle = "black";
-        ctx.fillText(text, this.x, this.y);
-    }
 }

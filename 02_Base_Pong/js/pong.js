@@ -15,12 +15,7 @@ let ctx;
 
 let oldTime;
 
-let paddleLeft;
-let paddleRight;
-let ball;
 let game;
-
-let scoreLabel;
 
 let paddleSpeed = 0.5;
 let initalBallSpeed = 0.2;
@@ -50,6 +45,7 @@ class Paddle extends GameObject {
     }
 }
 
+
 class Ball extends GameObject {
     constructor(color, width, height, x, y, type) {
         super(color, width, height, x, y, type);
@@ -68,7 +64,14 @@ class Ball extends GameObject {
         // Multiply the motion by a factor called ballSpeed
         this.position = this.position.plus(this.velocity.times(ballSpeed).times(deltaTime));
     }
+
+    resetPosition() {
+        ballSpeed = 0.0;
+        this.position = new Vec(canvasWidth / 2, canvasHeight / 2);
+        this.velocity = this.initVelocity();
+    }
 }
+
 
 class Obstacle extends GameObject {
     constructor(color, width, height, x, y, type) {
@@ -78,14 +81,21 @@ class Obstacle extends GameObject {
 
 
 class Game {
-    constructor(actors, state) {
-        this.actors = actors;
+    constructor(state) {
         this.state = state;
 
-        this.ball = actors[0];
-        this.obstacles = actors.slice(1);
+        this.initObjects();
 
-        this.scoreLabel = new TextLabel(canvasWidth*4/10, canvasHeight*8/10);
+        this.setEventListeners();
+
+        this.scoreLabelLeft = new TextLabel(canvasWidth * 3 / 10,
+                                            canvasHeight * 2 / 10,
+                                            "40px Ubuntu Mono",
+                                            "white");
+        this.scoreLabelRight = new TextLabel(canvasWidth * 7 / 10,
+                                             canvasHeight * 2 / 10,
+                                             "40px Ubuntu Mono",
+                                             "white");
     }
 
     update(deltaTime) {
@@ -95,31 +105,25 @@ class Game {
 
         // Detect collisions
         for (let actor of this.obstacles) {
-            if (overlapRectangles(ball, actor)) {
+            if (overlapRectangles(this.ball, actor)) {
                 //console.log(`Collision of ${ball.type} with ${actor.type}`);
                 // Invert the direction of the ball's movement
                 if (actor.type == 'paddle') {
-                    ball.velocity.x *= -1;
+                    this.ball.velocity.x *= -1;
                 } else if (actor.type == 'wall') {
-                    ball.velocity.y *= -1;
+                    this.ball.velocity.y *= -1;
                     ballSpeed += speedIncrement;
                 } else if (actor.type == 'goalLeft') {
                     pointsRight += 1;
-                    this.resetBall();
+                    this.ball.resetPosition();
                     console.log(`Score: ${pointsLeft}, ${pointsRight}`);
                 } else if (actor.type == 'goalRight') {
                     pointsLeft += 1;
-                    this.resetBall();
+                    this.ball.resetPosition();
                     console.log(`Score: ${pointsLeft}, ${pointsRight}`);
                 }
             }
         }
-    }
-
-    resetBall() {
-        ballSpeed = 0.0;
-        ball.position = new Vec(canvasWidth/2, canvasHeight/2);
-        ball.velocity = ball.initVelocity();
     }
 
     draw(ctx) {
@@ -127,7 +131,64 @@ class Game {
             actor.draw(ctx);
         }
 
-        scoreLabel.draw(ctx, `Score: ${pointsLeft} - ${pointsRight}`);
+        this.scoreLabelLeft.draw(ctx, `${pointsLeft}`);
+        this.scoreLabelRight.draw(ctx, `${pointsRight}`);
+    }
+
+    // Initialize the game objects
+    initObjects() {
+        this.ball = new Ball("green", 10, 10, canvasWidth / 2, canvasHeight / 2, 'ball');
+        this.paddleLeft = new Paddle("red", 10, 50, 20, canvasHeight / 2, 'paddle');
+        this.paddleRight = new Paddle("red", 10, 50, canvasWidth - 30, canvasHeight / 2, 'paddle');
+        this.wallUp = new Obstacle("#ffffff", canvasWidth, 10, 0, 20, 'wall');
+        this.wallDown = new Obstacle("#ffffff", canvasWidth, 10, 0, canvasHeight - 30, 'wall');
+        this.goalLeft = new Obstacle("yellow", 10, canvasHeight, 0, 0, 'goalLeft');
+        this.goalRight = new Obstacle("yellow", 10, canvasHeight, canvasWidth - 10, 0, 'goalRight');
+
+        // Lists to iterate over all objects
+        this.obstacles = [this.paddleLeft, this.paddleRight,
+                          this.wallUp, this.wallDown,
+                          this.goalLeft, this.goalRight]
+        this.actors = [this.ball].concat(this.obstacles);
+    }
+
+    setEventListeners() {
+        window.addEventListener("keydown", event => {
+            if (event.key == 'q') {
+                this.paddleLeft.velocity.y = -paddleSpeed;
+            }
+            if (event.key == 'a') {
+                this.paddleLeft.velocity.y = paddleSpeed;
+            }
+            if (event.key == 'o') {
+                this.paddleRight.velocity.y = -paddleSpeed;
+            }
+            if (event.key == 'l') {
+                this.paddleRight.velocity.y = paddleSpeed;
+            }
+        });
+
+        window.addEventListener("keyup", event => {
+            if (event.key == 'q') {
+                this.paddleLeft.velocity.y = 0.0;
+            }
+            if (event.key == 'a') {
+                this.paddleLeft.velocity.y = 0.0;
+            }
+            if (event.key == 'o') {
+                this.paddleRight.velocity.y = 0.0;
+            }
+            if (event.key == 'l') {
+                this.paddleRight.velocity.y = 0.0;
+            }
+
+            // Start the game when pressing g
+            if (event.key == 'g') {
+                if (ballSpeed == 0.0) {
+                    ballSpeed = initalBallSpeed;
+                }
+            }
+        });
     }
 }
 
@@ -148,64 +209,11 @@ function init() {
 }
 
 function gameStart() {
-    // Initialize the game objects
-    ball = new Ball("green", 10, 10, canvasWidth/2, canvasHeight/2, 'ball');
-    paddleLeft = new Paddle("red", 10, 50, 20, 20, 'paddle');
-    paddleRight = new Paddle("red", 10, 50, canvasWidth - 30, 20, 'paddle');
-    const wallUp = new Obstacle("black", canvasWidth, 10, 0, 20, 'wall');
-    const wallDown = new Obstacle("black", canvasWidth, 10, 0, canvasHeight - 30, 'wall');
-    const goalLeft = new Obstacle("yellow", 10, canvasHeight, 0, 0, 'goalLeft');
-    const goalRight = new Obstacle("yellow", 10, canvasHeight, canvasWidth-10, 0, 'goalRight');
-
     // Register the objects in the game
-    game = new Game([ball, paddleLeft, paddleRight, wallUp, wallDown, goalLeft, goalRight], 'playing');
-
-    // Place a text object to show the results of the game
-    scoreLabel = new TextLabel(canvasWidth*4/10, canvasHeight*8/10);
-
-    setEventListeners();
+    game = new Game('playing');
 
     // Call the first frame with the current time
     updateCanvas(document.timeline.currentTime);
-}
-
-function setEventListeners() {
-    window.addEventListener("keydown", event => {
-        if (event.key == 'q') {
-            paddleLeft.velocity.y = -paddleSpeed;
-        }
-        if (event.key == 'a') {
-            paddleLeft.velocity.y = paddleSpeed;
-        }
-        if (event.key == 'o') {
-            paddleRight.velocity.y = -paddleSpeed;
-        }
-        if (event.key == 'l') {
-            paddleRight.velocity.y = paddleSpeed;
-        }
-    });
-
-    window.addEventListener("keyup", event => {
-        if (event.key == 'q') {
-            paddleLeft.velocity.y = 0.0;
-        }
-        if (event.key == 'a') {
-            paddleLeft.velocity.y = 0.0;
-        }
-        if (event.key == 'o') {
-            paddleRight.velocity.y = 0.0;
-        }
-        if (event.key == 'l') {
-            paddleRight.velocity.y = 0.0;
-        }
-
-        // Start the game when pressing g
-        if (event.key == 'g') {
-            if (ballSpeed == 0.0) {
-                ballSpeed = initalBallSpeed;
-            }
-        }
-    });
 }
 
 // Function that will be called for the game loop
