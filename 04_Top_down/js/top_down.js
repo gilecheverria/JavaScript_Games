@@ -23,7 +23,7 @@ let level;
 let playerSpeed = 0.005;
 
 // Scale of the whole world, to be applied to all objects
-const scale = 20;
+const scale = 22;
 
 class Player extends GameObject {
     constructor(_color, width, height, x, y, _type) {
@@ -33,26 +33,13 @@ class Player extends GameObject {
     }
 
     update(level) {
+        // Find out where the player should end if it moves
         let newPosition = this.position.plus(this.velocity.times(elapsed));
 
+        // Move only if the player does not move inside a wall
         if (! level.contact(newPosition, this.size, 'wall')) {
             this.position = newPosition;
         }
-
-
-
-        /*
-
-        //this.position = this.position.plus(this.velocity.times(elapsed));
-        // Stop motion at the top border
-        if (this.position.y < 0) {
-            this.position.y = 0;
-        }
-        // At the bottom border, consider the height of the paddle for the limit
-        if (this.position.y > canvasHeight - this.size.y) {
-            this.position.y = canvasHeight - this.size.y;
-        }
-        */
     }
 }
 
@@ -131,6 +118,8 @@ class Game {
         this.player = level.player;
         this.actors = level.actors;
         //console.log(level);
+        this.labelMoney = new TextLabel(20, canvasHeight - 30,
+                                        "30px Ubuntu Mono", "white");
     }
 
     update() {
@@ -140,24 +129,30 @@ class Game {
             actor.update();
         }
 
+        // A copy of the full list to iterate over all of them
+        // DOES THIS WORK?
+        let currentActors = this.actors;
         // Detect collisions
-        for (let actor of this.actors) {
+        for (let actor of currentActors) {
             if (overlapRectangles(this.player, actor)) {
                 //console.log(`Collision of ${this.player.type} with ${actor.type}`);
                 if (actor.type == 'wall') {
                     console.log("Hit a wall");
                 } else if (actor.type == 'coin') {
                     this.player.money += 1;
+                    this.actors = this.actors.filter(item => item !== actor);
                 }
             }
         }
     }
 
     draw(ctx, scale) {
-        this.player.draw(ctx, scale);
         for (let actor of this.actors) {
             actor.draw(ctx, scale);
         }
+        this.player.draw(ctx, scale);
+
+        this.labelMoney.draw(ctx, `Money: ${this.player.money}`);
     }
 }
 

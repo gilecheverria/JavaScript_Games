@@ -61,14 +61,16 @@ class GameObject {
 
 
 class TextLabel {
-    constructor(x, y) {
+    constructor(x, y, font, color) {
         this.x = x;
         this.y = y;
+        this.font = font;
+        this.color = color;
     }
 
     draw(ctx, text) {
-        ctx.font = "25px Ubuntu Mono";
-        ctx.fillStyle = "black";
+        ctx.font = this.font;
+        ctx.fillStyle = this.color;
         ctx.fillText(text, this.x, this.y);
     }
 }
