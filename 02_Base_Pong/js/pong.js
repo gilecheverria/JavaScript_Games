@@ -183,10 +183,8 @@ class Game {
             }
 
             // Start the game when pressing g
-            if (event.key == 'g') {
-                if (ballSpeed == 0.0) {
-                    ballSpeed = initalBallSpeed;
-                }
+            if (event.key == 'g' && ballSpeed == 0.0) {
+                ballSpeed = initalBallSpeed;
             }
         });
     }
