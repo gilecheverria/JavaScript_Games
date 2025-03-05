@@ -8,6 +8,8 @@ Test games done using JavaScript
 - https://learnjavascript.online/
 - https://eloquentjavascript.net/
 
+- https://developer.mozilla.org/en-US/docs/Games
+
 ### Using Mocha for unit testing
 - https://mochajs.org/
 
@@ -24,6 +26,9 @@ npm test test/<test_file>
 
 ## Game engines in JavaScript
 - https://phaser.io/
+
+## Physics engines in JavaScript
+- https://github.com/liabru/matter-js
 
 
 ## Examples of games in JS
@@ -44,3 +49,4 @@ npm test test/<test_file>
 
 - Sprite animation: https://www.youtube.com/watch?v=1bj7g6sXit8
 
+- Collision detection: https://www.sevenson.com.au/programming/sat/

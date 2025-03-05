@@ -31,31 +31,84 @@ class Vec {
 }
 
 
+class Rect {
+    constructor(x, y, width, height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
+}
+
+
 class GameObject {
     constructor(color, width, height, x, y, type) {
         this.position = new Vec(x, y);
         this.size = new Vec(width, height);
         this.color = color;
         this.type = type;
+
+        // Sprite properties
         this.spriteImage = undefined;
+        this.spriteRect = undefined;
     }
 
-    setSprite(imagePath) {
+    setSprite(imagePath, rect) {
         this.spriteImage = new Image();
         this.spriteImage.src = imagePath;
+        if (rect) {
+            this.spriteRect = rect;
+        }
     }
 
     draw(ctx, scale) {
         if (this.spriteImage) {
-            ctx.drawImage(this.spriteImage, this.position.x * scale, this.position.y * scale, this.size.x * scale, this.size.y * scale);
+            // Draw a sprite if the object has one defined
+            if (this.spriteRect) {
+                ctx.drawImage(this.spriteImage,
+                              this.spriteRect.x * this.spriteRect.width,
+                              this.spriteRect.y * this.spriteRect.height,
+                              this.spriteRect.width, this.spriteRect.height,
+                              this.position.x * scale, this.position.y * scale,
+                              this.size.x * scale, this.size.y * scale);
+            } else {
+                ctx.drawImage(this.spriteImage,
+                              this.position.x * scale, this.position.y * scale,
+                              this.size.x * scale, this.size.y * scale);
+            }
         } else {
+            // If there is no sprite asociated, just draw a color square
             ctx.fillStyle = this.color;
-            ctx.fillRect(this.position.x * scale, this.position.y * scale, this.size.x * scale, this.size.y * scale);
+            ctx.fillRect(this.position.x * scale, this.position.y * scale,
+                         this.size.x * scale, this.size.y * scale);
         }
     }
 
     update() {
 
+    }
+}
+
+class AnimatedObject extends GameObject {
+    constructor(color, width, height, x, y, type) {
+        super(color, width, height, x, y, type);
+        // Animation properties
+        this.frame = 0;
+        this.minFrame = 0;
+        this.maxFrame = 0;
+        this.sheetCols = 0;
+    }
+
+    setAnimation(minFrame, maxFrame) {
+        this.minFrame = minFrame;
+        this.maxFrame = maxFrame;
+        this.frame = minFrame;
+    }
+
+    updateFrame() {
+        this.frame = this.frame < this.maxFrame ? this.frame + 1 : this.minFrame;
+        this.spriteRect.x = this.frame % this.sheetCols;
+        this.spriteRect.y = Math.floor(this.frame / this.sheetCols);
     }
 }
 

@@ -14,7 +14,7 @@ const canvasHeight = 400;
 let ctx;
 
 let frameStart;
-let elapsed;
+let deltaTime;
 
 let game;
 let player;
@@ -32,9 +32,9 @@ class Player extends GameObject {
         this.money = 0;
     }
 
-    update(level) {
+    update(level, deltaTime) {
         // Find out where the player should end if it moves
-        let newPosition = this.position.plus(this.velocity.times(elapsed));
+        let newPosition = this.position.plus(this.velocity.times(deltaTime));
 
         // Move only if the player does not move inside a wall
         if (! level.contact(newPosition, this.size, 'wall')) {
@@ -43,9 +43,25 @@ class Player extends GameObject {
     }
 }
 
-class Coin extends GameObject {
+class Coin extends AnimatedObject {
     constructor(_color, width, height, x, y, _type) {
         super("yellow", width, height, x, y, "coin");
+
+        // Animation properties
+        this.sheetCols = 8;
+        this.setAnimation(0, 7);
+
+        // Delay between frames (in milliseconds)
+        this.frameTime = 100;
+        this.totalTime = 0;
+    }
+
+    update(_level, deltaTime) {
+        this.totalTime += deltaTime;
+        if (this.totalTime > this.frameTime) {
+            this.updateFrame();
+            this.totalTime = 0;
+        }
     }
 }
 
@@ -66,19 +82,21 @@ class Level {
         // Most cells are 'empty', except for the 'wall'
         this.rows = rows.map((row, y) => {
             return row.map((ch, x) => {
-                let type = levelChars[ch];
+                let item = levelChars[ch];
+                let type = item.type;
                 if (typeof type !== "string") {
                     let actor = new type("grey", 1, 1, x, y, "obstacle");
                     if (actor instanceof Player) {
-                        actor.setSprite('../assets/sprites/link_front.png');
+                        actor.setSprite(item.sprite);
                         this.player = actor;
                         type = "empty";
                     } else if (actor instanceof Coin) {
-                        actor.setSprite('../assets/sprites/coin.png');
+                        actor.setSprite(item.sprite, item.rect);
                         this.actors.push(actor);
                         type = "empty";
-                    } else {
+                    } else { // An obstacle
                         this.actors.push(actor);
+                        actor.setSprite(item.sprite, item.rect);
                         type = "wall";
                     }
                 }
@@ -122,11 +140,11 @@ class Game {
                                         "30px Ubuntu Mono", "white");
     }
 
-    update() {
-        this.player.update(this.level);
+    update(deltaTime) {
+        this.player.update(this.level, deltaTime);
 
         for (let actor of this.actors) {
-            actor.update();
+            actor.update(this.level, deltaTime);
         }
 
         // A copy of the full list to iterate over all of them
@@ -157,10 +175,18 @@ class Game {
 }
 
 const levelChars = {
-    ".": "empty",
-    "#": Obstacle,
-    "@": Player,
-    "$": Coin,
+    ".": {type: "empty",
+          sprite: undefined},
+    // Coordinates taken from the image:
+    // ProjectUtumno_full.png
+    "#": {type: Obstacle,
+          sprite: '../assets/sprites/ProjectUtumno_full.png',
+          rect: new Rect(12, 14, 32, 32)},
+    "@": {type: Player,
+          sprite: '../assets/sprites/link_front.png'},
+    "$": {type: Coin,
+          sprite: '../assets/sprites/coin_gold.png',
+          rect: new Rect(0, 0, 32, 32)},
 };
 
 function main() {
@@ -228,11 +254,11 @@ function updateCanvas(frameTime) {
     if (frameStart === undefined) {
         frameStart = frameTime;
     }
-    elapsed = frameTime - frameStart;
-    //console.log(`Elapsed: ${elapsed}`);
+    deltaTime = frameTime - frameStart;
+    //console.log(`Delta Time: ${deltaTime}`);
 
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    game.update();
+    game.update(deltaTime);
     game.draw(ctx, scale);
 
     frameStart = frameTime;
