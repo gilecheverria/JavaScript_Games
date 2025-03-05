@@ -97,6 +97,10 @@ class AnimatedObject extends GameObject {
         this.minFrame = 0;
         this.maxFrame = 0;
         this.sheetCols = 0;
+
+        // Delay between frames (in milliseconds)
+        this.frameTime = 100;
+        this.totalTime = 0;
     }
 
     setAnimation(minFrame, maxFrame) {
@@ -105,10 +109,14 @@ class AnimatedObject extends GameObject {
         this.frame = minFrame;
     }
 
-    updateFrame() {
-        this.frame = this.frame < this.maxFrame ? this.frame + 1 : this.minFrame;
-        this.spriteRect.x = this.frame % this.sheetCols;
-        this.spriteRect.y = Math.floor(this.frame / this.sheetCols);
+    updateFrame(deltaTime) {
+        this.totalTime += deltaTime;
+        if (this.totalTime > this.frameTime) {
+            this.frame = this.frame < this.maxFrame ? this.frame + 1 : this.minFrame;
+            this.spriteRect.x = this.frame % this.sheetCols;
+            this.spriteRect.y = Math.floor(this.frame / this.sheetCols);
+            this.totalTime = 0;
+        }
     }
 }
 

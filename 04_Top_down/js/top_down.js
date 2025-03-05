@@ -8,13 +8,12 @@
 "use strict";
 
 // Global variables
-const canvasWidth = 600;
-const canvasHeight = 400;
+const canvasWidth = 800;
+const canvasHeight = 600;
 
 let ctx;
 
 let frameStart;
-let deltaTime;
 
 let game;
 let player;
@@ -23,13 +22,18 @@ let level;
 let playerSpeed = 0.005;
 
 // Scale of the whole world, to be applied to all objects
-const scale = 22;
+// Each unit in the level file will be drawn as these many square pixels
+const scale = 29;
 
-class Player extends GameObject {
+
+class Player extends AnimatedObject {
     constructor(_color, width, height, x, y, _type) {
         super("green", width, height, x, y, "player");
         this.velocity = new Vec(0.0, 0.0);
         this.money = 0;
+
+        // Animation properties
+        this.sheetCols = 0;
     }
 
     update(level, deltaTime) {
@@ -40,8 +44,11 @@ class Player extends GameObject {
         if (! level.contact(newPosition, this.size, 'wall')) {
             this.position = newPosition;
         }
+
+        this.updateFrame(deltaTime);
     }
 }
+
 
 class Coin extends AnimatedObject {
     constructor(_color, width, height, x, y, _type) {
@@ -50,26 +57,13 @@ class Coin extends AnimatedObject {
         // Animation properties
         this.sheetCols = 8;
         this.setAnimation(0, 7);
-
-        // Delay between frames (in milliseconds)
-        this.frameTime = 100;
-        this.totalTime = 0;
     }
 
     update(_level, deltaTime) {
-        this.totalTime += deltaTime;
-        if (this.totalTime > this.frameTime) {
-            this.updateFrame();
-            this.totalTime = 0;
-        }
+        this.updateFrame(deltaTime);
     }
 }
 
-class Obstacle extends GameObject {
-    constructor(color, width, height, x, y, type) {
-        super(color, width, height, x, y, type);
-    }
-}
 
 class Level {
     constructor(plan) {
@@ -83,24 +77,46 @@ class Level {
         this.rows = rows.map((row, y) => {
             return row.map((ch, x) => {
                 let item = levelChars[ch];
-                let type = item.type;
-                if (typeof type !== "string") {
-                    let actor = new type("grey", 1, 1, x, y, "obstacle");
-                    if (actor instanceof Player) {
-                        actor.setSprite(item.sprite);
-                        this.player = actor;
-                        type = "empty";
-                    } else if (actor instanceof Coin) {
-                        actor.setSprite(item.sprite, item.rect);
-                        this.actors.push(actor);
-                        type = "empty";
-                    } else { // An obstacle
-                        this.actors.push(actor);
-                        actor.setSprite(item.sprite, item.rect);
-                        type = "wall";
-                    }
+                let objClass = item.objClass;
+                let cellType = item.label;
+                // Create a new instance of the type specified
+                let actor = new objClass("grey", 1, 1, x, y, item.label);
+                // Configurations for each type of cell
+                // TODO: Simplify this code, sinde most of it is repeated
+                if (actor.type == "player") {
+                    // Also instantiate a floor tile below the player
+                    let floor = levelChars['.'];
+                    let floorActor = new GameObject("grey", 1, 1, x, y, floor.label);
+                    floorActor.setSprite(floor.sprite, floor.rect);
+                    this.actors.push(floorActor);
+
+                    actor.setSprite(item.sprite, item.rect);
+                    actor.sheetCols = item.sheetCols;
+                    actor.setAnimation(...item.startFrame);
+                    this.player = actor;
+                    cellType = "empty";
+                } else if (actor.type == "coin") {
+                    // Also instantiate a floor tile below the player
+                    let floor = levelChars['.'];
+                    let floorActor = new GameObject("grey", 1, 1, x, y, floor.label);
+                    floorActor.setSprite(floor.sprite, floor.rect);
+                    this.actors.push(floorActor);
+
+                    actor.setSprite(item.sprite, item.rect);
+                    actor.sheetCols = item.sheetCols;
+                    actor.setAnimation(...item.startFrame);
+                    this.actors.push(actor);
+                    cellType = "empty";
+                } else if (actor.type == "wall") {
+                    this.actors.push(actor);
+                    actor.setSprite(item.sprite, item.rect);
+                    cellType = "wall";
+                } else if (actor.type == "floor") {
+                    this.actors.push(actor);
+                    actor.setSprite(item.sprite, item.rect);
+                    cellType = "floor";
                 }
-                return type;
+                return cellType;
             });
         });
     }
@@ -129,6 +145,7 @@ class Level {
     }
 }
 
+
 class Game {
     constructor(state, level) {
         this.state = state;
@@ -152,7 +169,7 @@ class Game {
         let currentActors = this.actors;
         // Detect collisions
         for (let actor of currentActors) {
-            if (overlapRectangles(this.player, actor)) {
+            if (actor.type != 'floor' && overlapRectangles(this.player, actor)) {
                 //console.log(`Collision of ${this.player.type} with ${actor.type}`);
                 if (actor.type == 'wall') {
                     console.log("Hit a wall");
@@ -174,20 +191,37 @@ class Game {
     }
 }
 
+
+// Object with the characters that appear in the level description strings
+// and their corresponding objects
 const levelChars = {
-    ".": {type: "empty",
-          sprite: undefined},
-    // Coordinates taken from the image:
-    // ProjectUtumno_full.png
-    "#": {type: Obstacle,
+    // Rect defined as offset from the first tile, and size of the tiles
+    ".": {objClass: GameObject,
+          label: "floor",
           sprite: '../assets/sprites/ProjectUtumno_full.png',
-          rect: new Rect(12, 14, 32, 32)},
-    "@": {type: Player,
-          sprite: '../assets/sprites/link_front.png'},
-    "$": {type: Coin,
+          rect: new Rect(12, 17, 32, 32)},
+    "#": {objClass: GameObject,
+          label: "wall",
+          sprite: '../assets/sprites/ProjectUtumno_full.png',
+          rect: new Rect(2, 19, 32, 32)},
+    "@": {objClass: Player,
+          label: "player",
+          //sprite: '../assets/sprites/blordrough_quartermaster-NESW.png',
+          //rect: new Rect(0, 0, 48, 64),
+          //sheetCols: 3,
+          //startFrame: [7, 7]},
+          sprite: '../assets/sprites/link_sprite_sheet.png',
+          rect: new Rect(0, 0, 120, 130),
+          sheetCols: 10,
+          startFrame: [0, 0]},
+    "$": {objClass: Coin,
+          label: "collectible",
           sprite: '../assets/sprites/coin_gold.png',
-          rect: new Rect(0, 0, 32, 32)},
+          rect: new Rect(0, 0, 32, 32),
+          sheetCols: 8,
+          startFrame: [0, 7]},
 };
+
 
 function main() {
     // Set a callback for when the page is loaded,
@@ -221,30 +255,46 @@ function setEventListeners() {
     window.addEventListener("keydown", event => {
         if (event.key == 'w') {
             game.player.velocity.y = -playerSpeed;
+            //game.player.setAnimation(0, 2);
+            game.player.setAnimation(60, 69);
         }
         if (event.key == 'a') {
             game.player.velocity.x = -playerSpeed;
+            //game.player.setAnimation(9, 11);
+            game.player.setAnimation(50, 59);
         }
         if (event.key == 's') {
             game.player.velocity.y = playerSpeed;
+            //game.player.setAnimation(6, 8);
+            game.player.setAnimation(40, 49);
         }
         if (event.key == 'd') {
             game.player.velocity.x = playerSpeed;
+            //game.player.setAnimation(3, 5);
+            game.player.setAnimation(70, 79);
         }
     });
 
     window.addEventListener("keyup", event => {
         if (event.key == 'w') {
             game.player.velocity.y = 0.0;
+            //game.player.setAnimation(1, 1);
+            game.player.setAnimation(20, 20);
         }
         if (event.key == 'a') {
             game.player.velocity.x = 0.0;
+            //game.player.setAnimation(10, 10);
+            game.player.setAnimation(10, 12);
         }
         if (event.key == 's') {
             game.player.velocity.y = 0.0;
+            //game.player.setAnimation(7, 7);
+            game.player.setAnimation(0, 2);
         }
         if (event.key == 'd') {
             game.player.velocity.x = 0.0;
+            //game.player.setAnimation(4, 4);
+            game.player.setAnimation(30, 32);
         }
     });
 }
@@ -254,7 +304,7 @@ function updateCanvas(frameTime) {
     if (frameStart === undefined) {
         frameStart = frameTime;
     }
-    deltaTime = frameTime - frameStart;
+    let deltaTime = frameTime - frameStart;
     //console.log(`Delta Time: ${deltaTime}`);
 
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
