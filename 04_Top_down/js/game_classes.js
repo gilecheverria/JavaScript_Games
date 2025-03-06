@@ -98,21 +98,29 @@ class AnimatedObject extends GameObject {
         this.maxFrame = 0;
         this.sheetCols = 0;
 
+        this.repeat = true;
+
         // Delay between frames (in milliseconds)
-        this.frameTime = 100;
+        this.frameDuration = 100;
         this.totalTime = 0;
     }
 
-    setAnimation(minFrame, maxFrame) {
+    setAnimation(minFrame, maxFrame, repeat, duration) {
         this.minFrame = minFrame;
         this.maxFrame = maxFrame;
         this.frame = minFrame;
+        this.repeat = repeat;
+        this.totalTime = 0;
+        this.frameDuration = duration;
     }
 
     updateFrame(deltaTime) {
         this.totalTime += deltaTime;
-        if (this.totalTime > this.frameTime) {
-            this.frame = this.frame < this.maxFrame ? this.frame + 1 : this.minFrame;
+        if (this.totalTime > this.frameDuration) {
+            // Loop around the animation frames if the animation is set to repeat
+            // Otherwise stay on the last frame
+            let restartFrame = (this.repeat ? this.minFrame : this.frame);
+            this.frame = this.frame < this.maxFrame ? this.frame + 1 : restartFrame;
             this.spriteRect.x = this.frame % this.sheetCols;
             this.spriteRect.y = Math.floor(this.frame / this.sheetCols);
             this.totalTime = 0;

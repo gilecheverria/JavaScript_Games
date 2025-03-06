@@ -11,6 +11,8 @@ https://opengameart.org/content/dungeon-crawl-32x32-tiles-supplemental
 ### Characters
 https://opengameart.org/content/blordrough
 
+### Sounds
+https://opengameart.org/content/10-8bit-coin-sounds
 
 ## Not used
 

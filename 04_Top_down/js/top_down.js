@@ -32,8 +32,45 @@ class Player extends AnimatedObject {
         this.velocity = new Vec(0.0, 0.0);
         this.money = 0;
 
-        // Animation properties
-        this.sheetCols = 0;
+        // Movement variables to define directions and animations
+        this.movement = {
+            right: { status: false,
+                     axis: "x",
+                     sign: 1,
+                     repeat: true,
+                     duration: 100,
+                     //moveFrames: [3, 5],
+                     //idleFrames: [4, 4] },
+                     moveFrames: [70, 79],
+                     idleFrames: [30, 32] },
+            left:  { status: false,
+                     axis: "x",
+                     sign: -1,
+                     repeat: true,
+                     duration: 100,
+                     //moveFrames: [9, 11],
+                     //idleFrames: [10, 10] },
+                     moveFrames: [50, 59],
+                     idleFrames: [10, 12] },
+            up:    { status: false,
+                     axis: "y",
+                     sign: -1,
+                     repeat: true,
+                     duration: 100,
+                     //moveFrames: [0, 2],
+                     //idleFrames: [1, 1] },
+                     moveFrames: [60, 69],
+                     idleFrames: [20, 20] },
+            down:  { status: false,
+                     axis: "y",
+                     sign: 1,
+                     repeat: true,
+                     duration: 100,
+                     //moveFrames: [6, 8],
+                     //idleFrames: [7, 7] },
+                     moveFrames: [40, 49],
+                     idleFrames: [0, 2] },
+        };
     }
 
     update(level, deltaTime) {
@@ -47,16 +84,28 @@ class Player extends AnimatedObject {
 
         this.updateFrame(deltaTime);
     }
+
+    startMovement(direction) {
+        const dirData = this.movement[direction];
+        if (!dirData.status) {
+            dirData.status = true;
+            this.velocity[dirData.axis] = dirData.sign * playerSpeed;
+            this.setAnimation(...dirData.moveFrames, dirData.repeat, dirData.duration);
+        }
+    }
+
+    stopMovement(direction) {
+        const dirData = this.movement[direction];
+        dirData.status = false;
+        this.velocity[dirData.axis] = 0;
+        this.setAnimation(...dirData.idleFrames, dirData.repeat, dirData.duration);
+    }
 }
 
 
 class Coin extends AnimatedObject {
     constructor(_color, width, height, x, y, _type) {
         super("yellow", width, height, x, y, "coin");
-
-        // Animation properties
-        this.sheetCols = 8;
-        this.setAnimation(0, 7);
     }
 
     update(_level, deltaTime) {
@@ -67,6 +116,7 @@ class Coin extends AnimatedObject {
 
 class Level {
     constructor(plan) {
+        // Split the plan string into a matrix of strings
         let rows = plan.trim().split('\n').map(l => [...l]);
         this.height = rows.length;
         this.width = rows[0].length;
@@ -85,40 +135,53 @@ class Level {
                 // TODO: Simplify this code, sinde most of it is repeated
                 if (actor.type == "player") {
                     // Also instantiate a floor tile below the player
-                    let floor = levelChars['.'];
-                    let floorActor = new GameObject("grey", 1, 1, x, y, floor.label);
-                    floorActor.setSprite(floor.sprite, floor.rect);
-                    this.actors.push(floorActor);
+                    this.addBackgroundFloor(x, y);
 
                     actor.setSprite(item.sprite, item.rect);
                     actor.sheetCols = item.sheetCols;
-                    actor.setAnimation(...item.startFrame);
+                    actor.setAnimation(...item.startFrame, true, 100);
                     this.player = actor;
                     cellType = "empty";
                 } else if (actor.type == "coin") {
                     // Also instantiate a floor tile below the player
-                    let floor = levelChars['.'];
-                    let floorActor = new GameObject("grey", 1, 1, x, y, floor.label);
-                    floorActor.setSprite(floor.sprite, floor.rect);
-                    this.actors.push(floorActor);
+                    this.addBackgroundFloor(x, y);
 
                     actor.setSprite(item.sprite, item.rect);
                     actor.sheetCols = item.sheetCols;
-                    actor.setAnimation(...item.startFrame);
+                    actor.setAnimation(...item.startFrame, true, 100);
                     this.actors.push(actor);
                     cellType = "empty";
                 } else if (actor.type == "wall") {
-                    this.actors.push(actor);
+                    // Randomize sprites for each wall tile
+                    item.rect = this.randomTile(31, 10, 17);     // green broken bricks
+                    // item.rect = this.randomTile(2, 3, 19);     // green broken bricks
                     actor.setSprite(item.sprite, item.rect);
+                    this.actors.push(actor);
                     cellType = "wall";
                 } else if (actor.type == "floor") {
-                    this.actors.push(actor);
+                    // Randomize sprites for each wall tile
+                    item.rect = this.randomTile(11, 4, 17);     // beige dirt
                     actor.setSprite(item.sprite, item.rect);
+                    this.actors.push(actor);
                     cellType = "floor";
                 }
                 return cellType;
             });
         });
+    }
+
+    addBackgroundFloor(x, y) {
+        let floor = levelChars['.'];
+        let floorActor = new GameObject("grey", 1, 1, x, y, floor.label);
+        floor.rect = this.randomTile(11, 4, 17);     // beige dirt
+        floorActor.setSprite(floor.sprite, floor.rect);
+        this.actors.push(floorActor);
+    }
+
+    // Randomize sprites for each wall tile
+    randomTile(xStart, xRange, y) {
+        let tile = Math.floor(Math.random() * xRange + xStart);
+        return new Rect(tile, y, 32, 32);
     }
 
     // Detect when the player touches a wall
@@ -240,9 +303,7 @@ function init() {
 }
 
 function gameStart() {
-    // Initialize the game objects
-
-    // Register the objects in the game
+    // Register the game object, which creates all other objects
     game = new Game('playing', new Level(GAME_LEVELS[1]));
 
     setEventListeners();
@@ -254,47 +315,31 @@ function gameStart() {
 function setEventListeners() {
     window.addEventListener("keydown", event => {
         if (event.key == 'w') {
-            game.player.velocity.y = -playerSpeed;
-            //game.player.setAnimation(0, 2);
-            game.player.setAnimation(60, 69);
+            game.player.startMovement("up");
         }
         if (event.key == 'a') {
-            game.player.velocity.x = -playerSpeed;
-            //game.player.setAnimation(9, 11);
-            game.player.setAnimation(50, 59);
+            game.player.startMovement("left");
         }
         if (event.key == 's') {
-            game.player.velocity.y = playerSpeed;
-            //game.player.setAnimation(6, 8);
-            game.player.setAnimation(40, 49);
+            game.player.startMovement("down");
         }
         if (event.key == 'd') {
-            game.player.velocity.x = playerSpeed;
-            //game.player.setAnimation(3, 5);
-            game.player.setAnimation(70, 79);
+            game.player.startMovement("right");
         }
     });
 
     window.addEventListener("keyup", event => {
         if (event.key == 'w') {
-            game.player.velocity.y = 0.0;
-            //game.player.setAnimation(1, 1);
-            game.player.setAnimation(20, 20);
+            game.player.stopMovement("up");
         }
         if (event.key == 'a') {
-            game.player.velocity.x = 0.0;
-            //game.player.setAnimation(10, 10);
-            game.player.setAnimation(10, 12);
+            game.player.stopMovement("left");
         }
         if (event.key == 's') {
-            game.player.velocity.y = 0.0;
-            //game.player.setAnimation(7, 7);
-            game.player.setAnimation(0, 2);
+            game.player.stopMovement("down");
         }
         if (event.key == 'd') {
-            game.player.velocity.x = 0.0;
-            //game.player.setAnimation(4, 4);
-            game.player.setAnimation(30, 32);
+            game.player.stopMovement("right");
         }
     });
 }
@@ -311,6 +356,7 @@ function updateCanvas(frameTime) {
     game.update(deltaTime);
     game.draw(ctx, scale);
 
+    // Update time for the next frame
     frameStart = frameTime;
     requestAnimationFrame(updateCanvas);
 }
