@@ -24,6 +24,10 @@ To run individual files, from the root directory:
 npm test test/<test_file>
 ```
 
+
+## Recover minimized JavaScript
+- https://beautifier.io/
+
 ## Game engines in JavaScript
 - https://phaser.io/
 
@@ -42,11 +46,23 @@ npm test test/<test_file>
 
 ## Notes:
 
-- Using for..in with an Array will return the indices as strings.
+- Using `for..in` with an Array will return the indices as strings.
 
 
 ## Game techniques
 
 - Sprite animation: https://www.youtube.com/watch?v=1bj7g6sXit8
 
-- Collision detection: https://www.sevenson.com.au/programming/sat/
+- Collision detection:
+    - https://www.sevenson.com.au/programming/sat/
+    - https://blog.bearcats.nl/capsule-triangle-sweep/
+
+- Camera control:
+    - https://jsfiddle.net/gfcarv/QKgHs/
+    - https://stackoverflow.com/questions/16919601/html5-canvas-camera-viewport-how-to-actually-do-it
+
+    - https://www.freecodecamp.org/news/javascript-game-tutorial-stick-hero-with-html-canvas/
+
+
+## Game Examples
+- https://www.sitepoint.com/3-great-javascript-canvas-games-examples/

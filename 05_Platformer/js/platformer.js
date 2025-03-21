@@ -1,5 +1,5 @@
 /*
- * Simple top down adventure game
+ * Simple side view platformer
  *
  * Gilberto Echeverria
  * 2025-02-05

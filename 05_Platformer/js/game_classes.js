@@ -89,6 +89,7 @@ class GameObject {
     }
 }
 
+
 class AnimatedObject extends GameObject {
     constructor(color, width, height, x, y, type) {
         super(color, width, height, x, y, type);

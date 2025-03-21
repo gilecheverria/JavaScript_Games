@@ -86,7 +86,9 @@ class Player extends AnimatedObject {
     }
 
     startMovement(direction) {
+        // Check whether we are already moving in a direction
         const dirData = this.movement[direction];
+        // Make changes only if the direction is different
         if (!dirData.status) {
             dirData.status = true;
             this.velocity[dirData.axis] = dirData.sign * playerSpeed;
@@ -115,6 +117,7 @@ class Coin extends AnimatedObject {
 
 
 class Level {
+    // Read a string with the description of the objects in the level
     constructor(plan) {
         // Split the plan string into a matrix of strings
         let rows = plan.trim().split('\n').map(l => [...l]);
@@ -132,7 +135,7 @@ class Level {
                 // Create a new instance of the type specified
                 let actor = new objClass("grey", 1, 1, x, y, item.label);
                 // Configurations for each type of cell
-                // TODO: Simplify this code, sinde most of it is repeated
+                // TODO: Simplify this code, since most of it is repeated
                 if (actor.type == "player") {
                     // Also instantiate a floor tile below the player
                     this.addBackgroundFloor(x, y);
@@ -184,7 +187,7 @@ class Level {
         return new Rect(tile, y, 32, 32);
     }
 
-    // Detect when the player touches a wall
+    // Detect when the player touches a wall of the level
     contact(playerPos, playerSize, type) {
         // Determine which cells the player is occupying
         let xStart = Math.floor(playerPos.x);
