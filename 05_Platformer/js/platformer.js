@@ -85,39 +85,6 @@ class Player extends AnimatedObject {
         let velX = this.velocity.x;
         let velY = this.velocity.y;
 
-        /*
-        // Find out where the player should end if it moves
-        let newXPosition = this.position.plus(new Vec(velX * deltaTime, 0));
-        // Move only if the player does not move inside a wall
-        if (!level.contact(newXPosition, this.size, 'wall')) {
-            this.position = newXPosition;
-        }
-
-        // TEST FOR SCROLL
-        if (this.position.x > 15) {
-            game.scroll = this.position.x - 15;
-        }
-        */
-
-        /*
-        // Scrolling the world instead of the player
-        let newXPosition = this.position.plus(new Vec(velX * deltaTime, 0));
-        if (!level.contact(this.position, this.size, 'wall')) {
-            game.scroll += velX * deltaTime;
-            this.position = newXPosition;
-        }
-
-
-        // Find out where the player should end if it moves
-        let newYPosition = this.position.plus(new Vec(0, velY * deltaTime));
-        // Move only if the player does not move inside a wall
-        if (!level.contact(newYPosition, this.size, 'wall')) {
-            this.position = newYPosition;
-        } else {
-            this.land();
-        }
-        */
-
         // Handle X-axis movement
         let newXPosition = this.position.plus(new Vec(velX * deltaTime, 0));
         let xCollision = level.contact(newXPosition, this.size, 'wall');
