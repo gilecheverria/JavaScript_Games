@@ -66,3 +66,11 @@ npm test test/<test_file>
 
 ## Game Examples
 - https://www.sitepoint.com/3-great-javascript-canvas-games-examples/
+
+
+## TODO:
+- [ ] Separate the background layer from the objects in the `05_Platformer`
+- [ ] Add enemies
+- [ ] Add enemy movement
+- [ ] Add health bars
+- [ ] Add mounse pointer interaction
