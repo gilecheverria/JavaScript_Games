@@ -47,6 +47,7 @@ class GameObject {
         this.size = new Vec(width, height);
         this.color = color;
         this.type = type;
+        this.showBox = false;
 
         // Sprite properties
         this.spriteImage = undefined;
@@ -65,6 +66,7 @@ class GameObject {
         if (this.spriteImage) {
             // Draw a sprite if the object has one defined
             if (this.spriteRect) {
+                // Draw only a part of the sprite when indicated
                 ctx.drawImage(this.spriteImage,
                               this.spriteRect.x * this.spriteRect.width,
                               this.spriteRect.y * this.spriteRect.height,
@@ -81,6 +83,13 @@ class GameObject {
             ctx.fillStyle = this.color;
             ctx.fillRect(this.position.x * scale, this.position.y * scale,
                          this.size.x * scale, this.size.y * scale);
+        }
+
+        // Display the bounding box
+        if (this.showBox) {
+            ctx.strokeStyle = "black";
+            ctx.strokeRect(this.position.x * scale, this.position.y * scale,
+                           this.size.x * scale, this.size.y * scale);
         }
     }
 

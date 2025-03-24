@@ -71,6 +71,8 @@ class Player extends AnimatedObject {
                       upRight: [0, 0],
                       upLeft: [32, 32] },
         };
+
+        this.showBox = true;
     }
 
     update(level, deltaTime) {
@@ -83,12 +85,28 @@ class Player extends AnimatedObject {
         let velX = this.velocity.x;
         let velY = this.velocity.y;
 
+        /*
         // Find out where the player should end if it moves
         let newXPosition = this.position.plus(new Vec(velX * deltaTime, 0));
         // Move only if the player does not move inside a wall
         if (!level.contact(newXPosition, this.size, 'wall')) {
             this.position = newXPosition;
         }
+
+        // TEST FOR SCROLL
+        if (this.position.x > 15) {
+            game.scroll = this.position.x - 15;
+        }
+        */
+
+        /*
+        // Scrolling the world instead of the player
+        let newXPosition = this.position.plus(new Vec(velX * deltaTime, 0));
+        if (!level.contact(this.position, this.size, 'wall')) {
+            game.scroll += velX * deltaTime;
+            this.position = newXPosition;
+        }
+
 
         // Find out where the player should end if it moves
         let newYPosition = this.position.plus(new Vec(0, velY * deltaTime));
@@ -98,7 +116,43 @@ class Player extends AnimatedObject {
         } else {
             this.land();
         }
+        */
 
+        // Handle X-axis movement
+        let newXPosition = this.position.plus(new Vec(velX * deltaTime, 0));
+        let xCollision = level.contact(newXPosition, this.size, 'wall');
+
+        // Move if there was no collision
+        if (!xCollision.happened) {
+            // Scroll the whole level
+            game.scroll += velX * deltaTime;
+            // Move the character
+            this.position = newXPosition;
+        // Stop when hitting an object horizontally
+        } else if (xCollision.left || xCollision.right) {
+            this.velocity.x = 0;
+        }
+
+        // Handle Y-axis movement
+        let newYPosition = this.position.plus(new Vec(0, velY * deltaTime));
+        let yCollision = level.contact(newYPosition, this.size, 'wall');
+
+        if (!yCollision.happened) {
+            this.position = newYPosition;
+        } else {
+            if (yCollision.top) {
+                // Player is hitting a ceiling
+                this.velocity.y = 0;
+                // Adjust position to be just below the ceiling
+                this.position.y = Math.floor(this.position.y) + 1;
+            }
+            if (yCollision.bottom) {
+                // Player is landing on ground
+                this.land();
+            }
+        }
+
+        // Change the animation frame
         this.updateFrame(deltaTime);
     }
 
@@ -222,7 +276,10 @@ class Level {
                     this.addBackgroundFloor(x, y);
 
                     // Make the player larger
-                    actor.position = actor.position.plus(new Vec(0, -3));
+                    //actor.position = actor.position.plus(new Vec(0, -3));
+                    // Adjust the position of the player to be at the center,
+                    // for simpler scrolling
+                    actor.position = actor.position.plus(new Vec(11, -5));
                     actor.size = new Vec(3, 3);
 
                     actor.setSprite(item.sprite, item.rect);
@@ -246,7 +303,8 @@ class Level {
                     this.actors.push(actor);
                     cellType = "wall";
                 } else if (actor.type == "floor") {
-                    //actor.setSprite(item.sprite, item.rect);
+                    item.rect = this.randomTile(1, 8, 4);
+                    actor.setSprite(item.sprite, item.rect);
                     this.actors.push(actor);
                     cellType = "floor";
                 }
@@ -258,7 +316,8 @@ class Level {
     addBackgroundFloor(x, y) {
         let floor = levelChars['.'];
         let floorActor = new GameObject("skyblue", 1, 1, x, y, floor.label);
-        //floorActor.setSprite(floor.sprite, floor.rect);
+        floor.rect = this.randomTile(1, 8, 4);
+        floorActor.setSprite(floor.sprite, floor.rect);
         this.actors.push(floorActor);
     }
 
@@ -288,22 +347,47 @@ class Level {
         let yStart = Math.floor(playerPos.y);
         let yEnd = Math.ceil(playerPos.y + playerSize.y);
 
+        // Store collision information
+        let collision = {
+            happened: false,
+            top: false,
+            right: false,
+            bottom: false,
+            left: false
+        };
+
         // Check each of those cells
         for (let y=yStart; y<yEnd; y++) {
             for (let x=xStart; x<xEnd; x++) {
                 // Anything outside of the bounds of the canvas is considered
                 // to be a wall, so it blocks the player's movement
                 let isOutside = x < 0 || x >= this.width ||
-                                y < 0 || y >= this.height;
+                    y < 0 || y >= this.height;
                 let here = isOutside ? 'wall' : this.rows[y][x];
                 // Detect if an object of type specified is being touched
                 if (here == type) {
-                    return true;
+                    collision.happened = true;
+
+                    // Determine the collision side
+                    // Calculate overlap distances
+                    let overlapLeft = playerPos.x + playerSize.x - x;
+                    let overlapRight = x + 1 - playerPos.x;
+                    let overlapTop = playerPos.y + playerSize.y - y;
+                    let overlapBottom = y + 1 - playerPos.y;
+
+                    // Find the smallest overlap - that's likely our collision side
+                    let minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+
+                    if (minOverlap === overlapLeft) collision.right = true;
+                    if (minOverlap === overlapRight) collision.left = true;
+                    if (minOverlap === overlapTop) collision.bottom = true;
+                    if (minOverlap === overlapBottom) collision.top = true;
                 }
             }
         }
-        return false;
+        return collision;
     }
+
 }
 
 
@@ -313,6 +397,7 @@ class Game {
         this.level = level;
         this.player = level.player;
         this.actors = level.actors;
+        this.scroll = 0;
 
         this.labelMoney = new TextLabel(20, canvasHeight - 30,
                                         "30px Ubuntu Mono", "white");
@@ -349,14 +434,22 @@ class Game {
     }
 
     draw(ctx, scale) {
+        // Save the translation of the world before drawing other objects
+        ctx.save();
+        ctx.translate(this.scroll * -scale, 0);
+
         for (let actor of this.actors) {
             actor.draw(ctx, scale);
         }
         this.player.draw(ctx, scale);
 
+        ctx.restore();
+
+        // Draw static elements (GUI) after reseting the translation
         this.labelMoney.draw(ctx, `Money: ${this.player.money}`);
 
-        this.labelDebug.draw(ctx, `Velocity: ( ${this.player.velocity.x.toFixed(3)}, ${this.player.velocity.y.toFixed(3)} )`);
+        this.labelDebug.draw(ctx, `Scroll: ${this.scroll.toFixed(3)}, Player: ${this.player.position.x.toFixed(3)}`);
+        //this.labelDebug.draw(ctx, `Velocity: ( ${this.player.velocity.x.toFixed(3)}, ${this.player.velocity.y.toFixed(3)} )`);
     }
 }
 
