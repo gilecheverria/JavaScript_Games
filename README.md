@@ -70,7 +70,10 @@ npm test test/<test_file>
 
 ## TODO:
 - [ ] Separate the background layer from the objects in the `05_Platformer`
-- [ ] Add enemies
-- [ ] Add enemy movement
-- [ ] Add health bars
+- [x] Add enemies
+- [x] Add enemy movement
+- [x] Add health bars
 - [ ] Add mounse pointer interaction
+- [ ] Fix classes to remove unnecessary parameters for the constructors
+- [ ] Adapt `levelChars` to add a list of arguments for each constructor
+- [ ] Create a function to create the instances described by `levelChars`

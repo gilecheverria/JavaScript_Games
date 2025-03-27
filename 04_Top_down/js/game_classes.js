@@ -25,9 +25,27 @@ class Vec {
         return new Vec(this.x * factor, this.y * factor);
     }
 
-    get length() {
+    normalize() {
+        const len = this.length();
+        if (len == 0) {
+            return new Vec(0, 0);
+        }
+        return new Vec(this.x / len, this.y / len);
+    }
+
+    length() {
         return Math.sqrt(this.x ** 2 + this.y ** 2);
     }
+
+    directionTo(point) {
+        point.minus(this).normalize();
+    }
+
+    distanceTo(point) {
+        return point.minus(this).length();
+    }
+
+
 }
 
 
@@ -90,8 +108,8 @@ class GameObject {
 }
 
 class AnimatedObject extends GameObject {
-    constructor(color, width, height, x, y, type) {
-        super(color, width, height, x, y, type);
+    constructor(_color, width, height, x, y, type) {
+        super("white", width, height, x, y, type);
         // Animation properties
         this.frame = 0;
         this.minFrame = 0;
@@ -128,6 +146,75 @@ class AnimatedObject extends GameObject {
     }
 }
 
+class Character extends AnimatedObject {
+    constructor(color, width, height, x, y, type) {
+        super(color, width, height, x, y, type);
+        this.maxHP = 0;
+        this.hp = 0;
+    }
+
+    setMaxHP(value) {
+        this.maxHP = value;
+        this.hp = value;
+    }
+
+    takeDamage(amount) {
+        this.hp -= amount;
+        if (this.hp < 0) {
+            this.hp = 0;
+        }
+        if (this.hpBar) {
+            this.hpBar.update(this.hp / this.maxHP);
+        }
+    }
+}
+
+
+class Bullet extends AnimatedObject {
+    constructor(color, width, height, x, y, type) {
+        super(color, width, height, x, y, type);
+        this.velocity = new Vec(0, 0);
+        this.destroy = false;
+        this.speed = 0.005;
+        this.angle = 0;
+        this.startPosition = new Vec(x, y);
+    }
+
+    setVelocity(dirX, dirY) {
+        const moveVector = new Vec(dirX, dirY).minus(this.position).normalize();
+        this.angle = Math.atan2(moveVector.y, moveVector.x);
+        this.velocity = moveVector.times(this.speed);
+    }
+
+    update(level, deltaTime) {
+        // Find out where the bullet should end if it moves
+        let newPosition = this.position.plus(this.velocity.times(deltaTime));
+
+        // Move only if the bullet does not move inside a wall
+        if (! level.contact(newPosition, this.size, 'wall')) {
+            this.position = newPosition;
+        } else {
+            this.destroy = true;
+        }
+
+        this.updateFrame(deltaTime);
+    }
+
+    draw(ctx, scale) {
+        ctx.save();
+        //ctx.translate(-this.position.x * scale, -this.position.y * scale);
+        //ctx.rotate(this.angle);
+        //ctx.translate(this.position.x * scale, this.position.y * scale);
+        ctx.drawImage(this.spriteImage,
+                      this.spriteRect.x * this.spriteRect.width,
+                      this.spriteRect.y * this.spriteRect.height,
+                      this.spriteRect.width, this.spriteRect.height,
+                      this.position.x * scale, this.position.y * scale,
+                      this.size.x * scale, this.size.y * scale);
+        ctx.restore();
+    }
+}
+
 
 class TextLabel {
     constructor(x, y, font, color) {
@@ -144,6 +231,35 @@ class TextLabel {
     }
 }
 
+class MeterBar {
+    constructor(x, y, width, height, bgColor, fgColor, margin) {
+        // Two rectangles to be drawn to display the frame and the content
+        this.frame = new Rect(x, y, width, height);
+        this.content = new Rect(x + margin, y + margin,
+                                width - 2 * margin, height - 2 * margin);
+        this.bgColor = bgColor;
+        this.fgColor = fgColor;
+
+        // A factor to multiply the content by
+        this.percent = 1;
+    }
+
+    update(percent) {
+        this.percent = percent;
+    }
+
+    draw(ctx) {
+        // Draw the frame
+        ctx.fillStyle = this.bgColor;
+        ctx.fillRect(this.frame.x, this.frame.y,
+                     this.frame.width, this.frame.height);
+        // Draw the content, scaled by the percent
+        ctx.fillStyle = this.fgColor;
+        ctx.fillRect(this.content.x, this.content.y,
+                     this.content.width * this.percent, this.content.height);
+    }
+
+}
 
 // Simple collision detection between rectangles
 function overlapRectangles(actor1, actor2) {

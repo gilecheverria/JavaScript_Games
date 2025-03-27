@@ -11,6 +11,7 @@
 const canvasWidth = 800;
 const canvasHeight = 600;
 
+let canvas;
 let ctx;
 
 let frameStart;
@@ -26,11 +27,13 @@ let playerSpeed = 0.005;
 const scale = 29;
 
 
-class Player extends AnimatedObject {
-    constructor(_color, width, height, x, y, _type) {
-        super("green", width, height, x, y, "player");
+class Player extends Character {
+    constructor(width, height, x, y, type, maxHP) {
+        super(width, height, x, y, type, maxHP);
         this.velocity = new Vec(0.0, 0.0);
         this.money = 0;
+        this.setMaxHP(100);
+        this.hpBar = new MeterBar(70, canvasHeight - 100, 200, 30, "black", "green", 5);
 
         // Movement variables to define directions and animations
         this.movement = {
@@ -102,6 +105,70 @@ class Player extends AnimatedObject {
         this.velocity[dirData.axis] = 0;
         this.setAnimation(...dirData.idleFrames, dirData.repeat, dirData.duration);
     }
+
+    draw(ctx, scale) {
+        // Call the draw method of the base class
+        super.draw(ctx, scale);
+        // Also draw the health bar
+        this.drawHealthBar(ctx);
+    }
+
+    drawHealthBar(ctx) {
+        ctx.font = "30px Ubuntu Mono";
+        ctx.fillStyle = "white";
+        ctx.fillText(`HP:`, 20, canvasHeight - 78);
+        this.hpBar.draw(ctx);
+        ctx.font = "20px Ubuntu Mono";
+        ctx.fillStyle = "white";
+        ctx.fillText(`${this.hp} / ${this.maxHP}`, 90, canvasHeight - 78);
+    }
+}
+
+
+class Enemy extends Character {
+    constructor(width, height, x, y, type, maxHP) {
+        super(width, height, x, y, type, maxHP);
+        this.state = "chase";
+        this.speed = 0.0001;
+        this.velocity = new Vec(0.0, 0.0);
+        this.nextAttack = 1000; // Time before attacking next, in milliseconds
+        this.attackTimer = 0;
+        this.setMaxHP(100);
+    }
+
+    update(level, deltaTime) {
+        const distance = this.position.distanceTo(game.player.position);
+
+        if (distance > 10) {
+            this.state = "idle";
+        } else if (distance < 1) {
+            this.state = "attack";
+        } else {
+            this.state = "chase";
+        }
+
+        if (this.state == "chase") {
+            const direction = game.player.position.minus(this.position).normalize();
+            this.velocity = direction.times(this.speed * deltaTime);
+            const newPosition = this.position.plus(this.velocity.times(deltaTime));
+
+            // Move only if the player does not move inside a wall
+            if (! level.contact(newPosition, this.size, 'wall')) {
+                this.position = newPosition;
+            }
+        }
+
+        if (this.state == "attack") {
+            if (this.attackTimer > this.nextAttack) {
+                this.attackTimer = 0;
+                game.player.takeDamage(2);
+            } else {
+                this.attackTimer += deltaTime;
+            }
+        }
+
+        //this.updateFrame(deltaTime);
+    }
 }
 
 
@@ -124,6 +191,7 @@ class Level {
         this.height = rows.length;
         this.width = rows[0].length;
         this.actors = [];
+        this.enemies = [];
 
         // Fill the rows array with a label for the type of element in the cell
         // Most cells are 'empty', except for the 'wall'
@@ -153,6 +221,15 @@ class Level {
                     actor.sheetCols = item.sheetCols;
                     actor.setAnimation(...item.startFrame, true, 100);
                     this.actors.push(actor);
+                    cellType = "empty";
+                } else if (actor.type == "enemy") {
+                    // Also instantiate a floor tile below the player
+                    this.addBackgroundFloor(x, y);
+
+                    actor.setSprite(item.sprite, item.rect);
+                    //actor.sheetCols = item.sheetCols;
+                    //actor.setAnimation(...item.startFrame, true, 100);
+                    this.enemies.push(actor);
                     cellType = "empty";
                 } else if (actor.type == "wall") {
                     // Randomize sprites for each wall tile
@@ -218,16 +295,35 @@ class Game {
         this.level = level;
         this.player = level.player;
         this.actors = level.actors;
+        this.enemies = level.enemies;
+
+        this.playerBullets = [];
+        this.enemyBullets = [];
+
+
         //console.log(level);
         this.labelMoney = new TextLabel(20, canvasHeight - 30,
                                         "30px Ubuntu Mono", "white");
+        this.labelDebug = new TextLabel(400, canvasHeight - 30,
+                                        "30px Ubuntu Mono", "yellow");
     }
 
     update(deltaTime) {
         this.player.update(this.level, deltaTime);
 
+        for (let enemy of this.enemies) {
+            enemy.update(this.level, deltaTime);
+        }
+
         for (let actor of this.actors) {
             actor.update(this.level, deltaTime);
+        }
+
+        // Check which bullets can be removed from the list
+        this.playerBullets = this.playerBullets.filter(bullet => !bullet.destroy);
+        // Draw the active bullets
+        for (let bullet of this.playerBullets) {
+            bullet.update(this.level, deltaTime);
         }
 
         // A copy of the full list to iterate over all of them
@@ -251,9 +347,17 @@ class Game {
         for (let actor of this.actors) {
             actor.draw(ctx, scale);
         }
+        for (let enemy of this.enemies) {
+            enemy.draw(ctx, scale);
+        }
+        for (let bullet of this.playerBullets) {
+            bullet.draw(ctx, scale);
+        }
         this.player.draw(ctx, scale);
 
         this.labelMoney.draw(ctx, `Money: ${this.player.money}`);
+
+        this.labelDebug.draw(ctx, `Player bullets: ${this.playerBullets.length}`);
     }
 }
 
@@ -286,6 +390,16 @@ const levelChars = {
           rect: new Rect(0, 0, 32, 32),
           sheetCols: 8,
           startFrame: [0, 7]},
+    "E": {objClass: Enemy,
+          label: "enemy",
+          sprite: '../assets/sprites/ProjectUtumno_full.png',
+          rect: new Rect(10, 61, 32, 32)},
+    "B": {objClass: Coin,
+          label: "playerBullet",
+          sprite: '../assets/sprites/staff-shot-02-30x15.png',
+          rect: new Rect(0, 0, 30, 15),
+          sheetCols: 3,
+          startFrame: [3, 11]},
 };
 
 
@@ -296,7 +410,7 @@ function main() {
 }
 
 function init() {
-    const canvas = document.getElementById('canvas');
+    canvas = document.getElementById('canvas');
     //const canvas = document.querySelector('canvas');
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
@@ -343,6 +457,33 @@ function setEventListeners() {
         }
         if (event.key == 'd') {
             game.player.stopMovement("right");
+        }
+    });
+
+    // Detect mouse clicks only inside the canvas
+    canvas.addEventListener("click", event => {
+        // Detect left click
+        if (event.button == 0) {
+            // Identify the location of the canvas within the window
+            const rect = canvas.getBoundingClientRect();
+            // Get the coordinates where the mouse was in the window
+            // Adjust those coordinates to the area of the canvas
+            // Scale down the position by the drawing scale
+            const canX = (event.clientX - rect.left) / scale;
+            const canY = (event.clientY - rect.top) / scale;
+            //console.log(`WINDOW CLICK at: ${event.clientX}, ${event.clientY}`);
+            //console.log(`CANVAS CLICK at: ${canX}, ${canY}`);
+            //console.log(`PLAYER POS: ${game.player.position.x}, ${game.player.position.y}`);
+
+            // Create the bullet object
+            let item = levelChars["B"];
+            const bullet = new Bullet("red", 1, 1, game.player.position.x, game.player.position.y, item.label);
+            bullet.setSprite(item.sprite, item.rect);
+            bullet.sheetCols = item.sheetCols;
+            bullet.setAnimation(...item.startFrame, true, 100);
+
+            bullet.setVelocity(canX, canY);
+            game.playerBullets.push(bullet);
         }
     });
 }
