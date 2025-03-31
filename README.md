@@ -63,9 +63,12 @@ npm test test/<test_file>
 
     - https://www.freecodecamp.org/news/javascript-game-tutorial-stick-hero-with-html-canvas/
 
+- Mouse events:
+    https://javascript.info/mouse-events-basics
 
 ## Game Examples
 - https://www.sitepoint.com/3-great-javascript-canvas-games-examples/
+- https://codepen.io/FRADAR/pen/qBqLXyg
 
 
 ## TODO:
