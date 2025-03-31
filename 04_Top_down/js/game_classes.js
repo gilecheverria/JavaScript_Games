@@ -177,7 +177,6 @@ class Bullet extends AnimatedObject {
         this.destroy = false;
         this.speed = 0.005;
         this.angle = 0;
-        this.startPosition = new Vec(x, y);
     }
 
     setVelocity(dirX, dirY) {
@@ -200,17 +199,22 @@ class Bullet extends AnimatedObject {
         this.updateFrame(deltaTime);
     }
 
+    // Override the parent's draw method
     draw(ctx, scale) {
+        // Store the current transformation matrix
         ctx.save();
-        //ctx.translate(-this.position.x * scale, -this.position.y * scale);
-        //ctx.rotate(this.angle);
-        //ctx.translate(this.position.x * scale, this.position.y * scale);
+        // Apply the required rotation around the bullet center
+        ctx.translate(this.position.x * scale, this.position.y * scale);
+        ctx.rotate(this.angle);
+        ctx.translate(-this.position.x * scale, -this.position.y * scale);
+        // Draw the bullet
         ctx.drawImage(this.spriteImage,
                       this.spriteRect.x * this.spriteRect.width,
                       this.spriteRect.y * this.spriteRect.height,
                       this.spriteRect.width, this.spriteRect.height,
                       this.position.x * scale, this.position.y * scale,
                       this.size.x * scale, this.size.y * scale);
+        // Recover any previous transformations
         ctx.restore();
     }
 }

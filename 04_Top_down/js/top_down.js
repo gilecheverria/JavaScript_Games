@@ -1,5 +1,7 @@
 /*
  * Simple top down adventure game
+ * Reference for mouse events:
+ * https://javascript.info/mouse-events-basics
  *
  * Gilberto Echeverria
  * 2025-02-05
@@ -234,7 +236,7 @@ class Level {
                 } else if (actor.type == "wall") {
                     // Randomize sprites for each wall tile
                     item.rect = this.randomTile(31, 10, 17);     // green broken bricks
-                    // item.rect = this.randomTile(2, 3, 19);     // green broken bricks
+                    //item.rect = this.randomTile(2, 3, 19);     // grey bricks with ivy
                     actor.setSprite(item.sprite, item.rect);
                     this.actors.push(actor);
                     cellType = "wall";
