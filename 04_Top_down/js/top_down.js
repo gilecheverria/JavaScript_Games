@@ -306,6 +306,9 @@ class Game {
         this.coinSoundElement = document.createElement("audio");
         this.coinSoundElement.src = "../assets/sfx/coins/coin1.wav";
 
+        // Background music
+        this.bgMusicElement = document.createElement("audio");
+        this.bgMusicElement.src = "../assets/music/sanctuary_dungeon.mp3";
 
         //console.log(level);
         this.labelMoney = new TextLabel(20, canvasHeight - 30,
@@ -428,7 +431,7 @@ function init() {
 
 function gameStart() {
     // Register the game object, which creates all other objects
-    game = new Game('playing', new Level(GAME_LEVELS[1]));
+    game = new Game('paused', new Level(GAME_LEVELS[1]));
 
     setEventListeners();
 
@@ -449,6 +452,16 @@ function setEventListeners() {
         }
         if (event.key == 'd') {
             game.player.startMovement("right");
+        }
+
+        if (event.key == ' ') {
+            if (game.state == "paused") {
+                game.state = "playing";
+                game.bgMusicElement.play();
+            } else if (game.state == "playing") {
+                game.state = "paused";
+                game.bgMusicElement.pause();
+            }
         }
     });
 
@@ -497,18 +510,22 @@ function setEventListeners() {
 
 // Function that will be called for the game loop
 function updateCanvas(frameTime) {
-    if (frameStart === undefined) {
+    if (game.state == "playing") {
+        if (frameStart === undefined) {
+            frameStart = frameTime;
+        }
+        let deltaTime = frameTime - frameStart;
+        //console.log(`Delta Time: ${deltaTime}`);
+
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        game.update(deltaTime);
+        game.draw(ctx, scale);
+
+        // Update time for the next frame
         frameStart = frameTime;
+    } else {
+        game.labelDebug.draw(ctx, "Press spacebar to begin playing");
     }
-    let deltaTime = frameTime - frameStart;
-    //console.log(`Delta Time: ${deltaTime}`);
-
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    game.update(deltaTime);
-    game.draw(ctx, scale);
-
-    // Update time for the next frame
-    frameStart = frameTime;
     requestAnimationFrame(updateCanvas);
 }
 
