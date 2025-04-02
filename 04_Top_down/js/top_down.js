@@ -302,6 +302,10 @@ class Game {
         this.playerBullets = [];
         this.enemyBullets = [];
 
+        // Sound samples
+        this.coinSoundElement = document.createElement("audio");
+        this.coinSoundElement.src = "../assets/sfx/coins/coin1.wav";
+
 
         //console.log(level);
         this.labelMoney = new TextLabel(20, canvasHeight - 30,
@@ -340,6 +344,7 @@ class Game {
                 } else if (actor.type == 'coin') {
                     this.player.money += 1;
                     this.actors = this.actors.filter(item => item !== actor);
+                    this.coinSoundElement.play();
                 }
             }
         }
