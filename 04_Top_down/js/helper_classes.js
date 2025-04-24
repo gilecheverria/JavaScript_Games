@@ -61,6 +61,7 @@ class Rect {
 
 class GameObject {
     constructor(color, width, height, x, y, type) {
+        this.id = randomRange(9000, 1000);
         this.position = new Vec(x, y);
         this.size = new Vec(width, height);
         this.color = color;
@@ -123,7 +124,10 @@ class AnimatedObject extends GameObject {
         this.totalTime = 0;
     }
 
-    setAnimation(minFrame, maxFrame, repeat, duration) {
+    setAnimation(minFrame, maxFrame, repeat = true, duration = 100) {
+        if (this instanceof Enemy) {
+            console.log(`Enemy ${this.id} Moving ${this.moveDirection} frames: ${minFrame}, ${maxFrame}`);
+        }
         this.minFrame = minFrame;
         this.maxFrame = maxFrame;
         this.frame = minFrame;
@@ -271,4 +275,8 @@ function overlapRectangles(actor1, actor2) {
            actor1.position.x < actor2.position.x + actor2.size.x &&
            actor1.position.y + actor1.size.y > actor2.position.y &&
            actor1.position.y < actor2.position.y + actor2.size.y;
+}
+
+function randomRange(size, start) {
+    return Math.floor(Math.random() * size) + ((start === undefined) ? 0 : start);
 }
