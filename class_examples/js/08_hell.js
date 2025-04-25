@@ -25,6 +25,8 @@ let oldTime;
 
 let playerSpeed = 0.2;
 let bulletSpeed = 0.05;
+let bulletDelay = 80;
+let bulletAngleIncrement = Math.PI / 25.5;
 
 // Dictionary for the keys that will control player movement
 const keyDirections = {
@@ -125,9 +127,9 @@ class Bullet extends GameObject {
     checkAlive() {
         if (this.lifeTime > this.maxLife ||
             this.position.y < 0 ||
-            this.position.y + this.height > canvasHeight ||
+            this.position.y > canvasHeight ||
             this.position.x < 0 ||
-            this.position.x + this.width > canvasWidth) {
+            this.position.x > canvasWidth) {
             // Mark the bullet to be destroyed in the next frame
             this.destroy = true;
         }
@@ -139,18 +141,16 @@ class Bullet extends GameObject {
         ctx.save();
         // Apply the required rotation around the bullet center
         ctx.translate(this.position.x, this.position.y);
-        ctx.rotate(this.angle);
+        // Add 90 degrees to the angle because of the orientation of the sprites
+        ctx.rotate(this.angle + Math.PI / 2);
         ctx.translate(-this.position.x, -this.position.y);
         // Draw the bullet
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.position.x - this.width / 2,
-                     this.position.y - this.height / 2,
-                     this.width, this.height);
+        super.draw(ctx);
         // Recover any previous transformations
         ctx.restore();
 
         //this.drawBoundingBox(ctx);
-        this.drawCollider(ctx);
+        //this.drawCollider(ctx);
     }
 }
 
@@ -164,10 +164,10 @@ class Game {
         this.nextActorTime = randomRange(500, 1000);
         this.generateTime = 0;
 
-        this.bulletDelay = 100;
+        this.bulletDelay = bulletDelay;
         this.bulletTimer = 0;
         this.bulletAngle = 0;
-        this.bulletAngleIncrement = Math.PI / 18;
+        this.bulletAngleIncrement = bulletAngleIncrement;
     }
 
     initObjects() {
@@ -188,8 +188,8 @@ class Game {
             bullet.draw(ctx);
         }
         this.player.draw(ctx);
-        this.player.drawBoundingBox(ctx);
-        this.player.drawCollider(ctx);
+        //this.player.drawBoundingBox(ctx);
+        //this.player.drawCollider(ctx);
     }
 
     update(deltaTime) {
@@ -205,11 +205,11 @@ class Game {
         }
         for (let bullet of this.enemyBullets) {
             bullet.update(deltaTime);
-            bullet.setCollider(6, 6);
+            bullet.updateCollider();
         }
         // Move the player
         this.player.update(deltaTime);
-        this.player.setCollider(20, 30);
+        this.player.updateCollider();
 
         this.checkCollisions();
 
@@ -331,7 +331,10 @@ class Game {
     }
 
     addEnemyBullet(originX, originY, destX, destY) {
-        const bullet = new Bullet(new Vec(originX, originY), 12, 6, "purple");
+        const bullet = new Bullet(new Vec(originX, originY), 6, 12, "purple");
+        bullet.setSprite("../assets/sprites/beams.png",
+                         new Rect(238, 96, 44, 92)); // Blue beams
+                         //new Rect(231, 221, 40, 66)); // Purple beams
         bullet.setCollider(6, 6);
         bullet.setVelocity(destX, destY);
         game.enemyBullets.push(bullet);

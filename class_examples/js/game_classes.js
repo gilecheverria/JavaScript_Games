@@ -39,18 +39,12 @@ class Vec {
 
 class Rect {
     constructor(x, y, width, height) {
-        this.position = new Vec(x, y)
+        this.position = new Vec(x, y);
         this.width = width;
         this.height = height;
     }
 }
 
-
-class Collider {
-    constructor(gameObject, width, height) {
-
-    }
-}
 
 class GameObject {
     constructor(position, width, height, color, type) {
@@ -76,21 +70,26 @@ class GameObject {
     setCollider(width, height) {
         let xMargin = (this.width - width) / 2;
         let yMargin = (this.height - height) / 2;
-        let xOffset = this.width / 2 - xMargin;
-        let yOffset = this.height / 2 - yMargin;
-        console.log(`Margin: ${xMargin}, ${yMargin}`)
-        this.collider = new Rect(this.position.x - xOffset,
-                                 this.position.y - yOffset,
-                                 width,
-                                 height);
+        this.xOffset = this.width / 2 - xMargin;
+        this.yOffset = this.height / 2 - yMargin;
+        this.colliderWidth = width;
+        this.colliderHeight = height;
+        this.updateCollider();
+    }
+
+    updateCollider() {
+        this.collider = new Rect(this.position.x - this.xOffset,
+                                 this.position.y - this.yOffset,
+                                 this.colliderWidth,
+                                 this.colliderHeight);
     }
 
     draw(ctx) {
         if (this.spriteImage) {
             if (this.spriteRect) {
                 ctx.drawImage(this.spriteImage,
-                              this.spriteRect.x * this.spriteRect.width,
-                              this.spriteRect.y * this.spriteRect.height,
+                              this.spriteRect.position.x, // * this.spriteRect.width,
+                              this.spriteRect.position.y, // * this.spriteRect.height,
                               this.spriteRect.width, this.spriteRect.height,
                               this.position.x - this.width / 2,
                               this.position.y - this.height / 2,
