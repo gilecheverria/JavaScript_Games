@@ -255,7 +255,8 @@ function setEventListeners() {
             // Create the bullet object
             let item = levelChars["B"];
             const bullet = new Bullet("red", 1, 1, game.player.position.x, game.player.position.y, item.label);
-            bullet.setSprite(item.sprite, item.rect);
+            let instanceRect = new Rect(...item.rectParams);
+            bullet.setSprite(item.sprite, instanceRect);
             bullet.sheetCols = item.sheetCols;
             bullet.setAnimation(...item.startFrame, true, 100);
 
