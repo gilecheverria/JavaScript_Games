@@ -125,9 +125,9 @@ class AnimatedObject extends GameObject {
     }
 
     setAnimation(minFrame, maxFrame, repeat = true, duration = 100) {
-        if (this instanceof Enemy) {
-            console.log(`Enemy ${this.id} Moving ${this.moveDirection} frames: ${minFrame}, ${maxFrame}`);
-        }
+        //if (this instanceof Enemy) {
+        //    console.log(`Enemy ${this.id} Moving ${this.moveDirection} frames: ${minFrame}, ${maxFrame}`);
+        //}
         this.minFrame = minFrame;
         this.maxFrame = maxFrame;
         this.frame = minFrame;
@@ -155,6 +155,7 @@ class Character extends AnimatedObject {
         super(color, width, height, x, y, type);
         this.maxHP = 0;
         this.hp = 0;
+        this.status = "alive";
     }
 
     setMaxHP(value) {
@@ -164,8 +165,10 @@ class Character extends AnimatedObject {
 
     takeDamage(amount) {
         this.hp -= amount;
+        //console.log(`Character took damage. Now at ${this.hp} / ${this.maxHP}`);
         if (this.hp < 0) {
             this.hp = 0;
+            this.status = "dead";
         }
         if (this.hpBar) {
             this.hpBar.update(this.hp / this.maxHP);

@@ -56,14 +56,14 @@ class Game {
 
         // Background music
         this.bgMusicElement = document.createElement("audio");
+        this.bgMusicElement.src = "../assets/music/sanctuary_dungeon.mp3";
         // Set the music to play again when it finishes
         // As used at:
         //https://stackoverflow.com/questions/3273552/html5-audio-looping
-        this.bgMusicElement.addEventListener('ended', function() {
+        this.bgMusicElement.addEventListener("ended", function() {
             this.currentTime = 0;
             this.play();
         }, false);
-        this.bgMusicElement.src = "../assets/music/sanctuary_dungeon.mp3";
 
         //console.log(level);
         this.labelMoney = new TextLabel(20, canvasHeight - 30,
@@ -83,13 +83,18 @@ class Game {
             actor.update(this.level, deltaTime);
         }
 
+        this.playerInteraction();
+        this.enemyInteraction();
+
         // Check which bullets can be removed from the list
         this.playerBullets = this.playerBullets.filter(bullet => !bullet.destroy);
         // Draw the active bullets
         for (let bullet of this.playerBullets) {
             bullet.update(this.level, deltaTime);
         }
+    }
 
+    playerInteraction() {
         // A copy of the full list to iterate over all of them
         // DOES THIS WORK?
         let currentActors = this.actors;
@@ -103,6 +108,25 @@ class Game {
                     this.player.money += 1;
                     this.actors = this.actors.filter(item => item !== actor);
                     this.coinSoundElement.play();
+                }
+            }
+        }
+    }
+
+    enemyInteraction() {
+        let currentEnemies = this.enemies;
+        // Loop over all enemies
+        for (let enemy of currentEnemies) {
+            // Loop over all bullets
+            for (let bullet of this.playerBullets) {
+                if (overlapRectangles(enemy, bullet)) {
+                    enemy.takeDamage(30);
+                    // Destroy the bullet immediately
+                    this.playerBullets = this.playerBullets.filter(item => item !== bullet);
+                    // Destroy the enemy if it runs out of HP
+                    if (enemy.status == "dead") {
+                        this.enemies = this.enemies.filter(item => item !== enemy);
+                    }
                 }
             }
         }
@@ -123,7 +147,7 @@ class Game {
         this.labelMoney.draw(ctx, `Money: ${this.player.money}`);
 
         //this.labelDebug.draw(ctx, `Player bullets: ${this.playerBullets.length}`);
-        this.labelDebug.draw(ctx, `E0 ${this.enemies[0].id} ${this.enemies[0].moveDirection} | E1 ${this.enemies[1].id} ${this.enemies[1].moveDirection}`);
+        //this.labelDebug.draw(ctx, `E0 ${this.enemies[0].id} ${this.enemies[0].moveDirection} | E1 ${this.enemies[1].id} ${this.enemies[1].moveDirection}`);
     }
 }
 
