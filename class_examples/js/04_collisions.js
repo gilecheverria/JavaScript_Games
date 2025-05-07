@@ -57,7 +57,7 @@ class Game {
     }
 
     initObjects() {
-        this.player = new Player(new Vec(canvasWidth / 2, canvasHeight / 2), 60, 60, "red");
+        this.player = new Player(new Vec(canvasWidth / 2, canvasHeight / 2), 60, 60, "green");
 
         this.actors = [];
         const box1 = new GameObject(new Vec(300, 300), 80, 80, "grey");

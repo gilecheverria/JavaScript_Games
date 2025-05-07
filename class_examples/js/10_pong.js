@@ -61,10 +61,10 @@ class Paddle extends GameObject {
     update(deltaTime) {
         this.position = this.position.plus(this.velocity.times(deltaTime));
 
-        if (this.position.y < 0) {
-            this.position.y = 0;
-        } else if (this.position.y + this.height > canvasHeight) {
-            this.position.y = canvasHeight - this.height;
+        if (this.position.y - this.height / 2 < 0) {
+            this.position.y = this.height / 2;
+        } else if (this.position.y + this.height / 2 > canvasHeight) {
+            this.position.y = canvasHeight - this.height / 2;
         }
     }
 }
@@ -73,16 +73,16 @@ class Paddle extends GameObject {
 class Game {
     constructor(canvasWidth, canvasHeight) {
         // An object to represent the box to be displayed
-        this.box = new Ball(new Vec(canvasWidth / 2, canvasHeight / 2), 20, 20, "red");
+        this.box = new Ball(new Vec(canvasWidth / 2, canvasHeight / 2), 20, 20, "green");
         // The paddles that will be controlled by the players
-        this.leftPaddle = new Paddle(new Vec(20, canvasHeight / 2), 20, 100, "blue");
+        this.leftPaddle = new Paddle(new Vec(40, canvasHeight / 2), 20, 100, "blue");
         this.rightPaddle = new Paddle(new Vec(canvasWidth - 40, canvasHeight / 2), 20, 100, "blue");
         // Top and bottom bars where the ball can bounce
-        this.topBar = new GameObject(new Vec(0, 0), canvasWidth, 20, "black", "obstacle");
-        this.bottomBar = new GameObject(new Vec(0, canvasHeight - 20), canvasWidth, 20, "black", "obstacle");
+        this.topBar = new GameObject(new Vec(canvasWidth / 2, 10), canvasWidth, 20, "black", "obstacle");
+        this.bottomBar = new GameObject(new Vec(canvasWidth / 2, canvasHeight - 10), canvasWidth, 20, "black", "obstacle");
         // Goals on the sides. If the ball touches them a player scores
-        this.leftGoal = new GameObject(new Vec(0, 0), 2, canvasHeight, "green", "leftGoal");
-        this.rightGoal = new GameObject(new Vec(canvasWidth -2, 0), 2, canvasHeight, "green", "rightGoal");
+        this.leftGoal = new GameObject(new Vec(-10, canvasHeight / 2), 40, canvasHeight, "yellow", "leftGoal");
+        this.rightGoal = new GameObject(new Vec(canvasWidth + 10, canvasHeight / 2), 40, canvasHeight, "yellow", "rightGoal");
         // Text labels to show the game score
         this.leftLabel = new TextLabel(200, 100, "40px Ubuntu Mono", "white")
         this.rightLabel = new TextLabel(600, 100, "40px Ubuntu Mono", "white")

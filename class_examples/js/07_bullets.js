@@ -140,10 +140,14 @@ class Bullet extends GameObject {
         ctx.translate(-this.position.x, -this.position.y);
         // Draw the bullet
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.position.x, this.position.y,
-                     this.width, this.height);
+        ctx.fillRect((this.position.x - this.width / 2),
+                     (this.position.y - this.height / 2),
+                     this.width,
+                     this.height);
         // Recover any previous transformations
         ctx.restore();
+
+        if (showBBox) this.drawBoundingBox(ctx);
     }
 }
 
@@ -159,7 +163,8 @@ class Game {
     }
 
     initObjects() {
-        this.player = new Player(new Vec(canvasWidth / 2, canvasHeight / 2), 60, 60, "red");
+        this.player = new Player(new Vec(canvasWidth / 2, canvasHeight / 2), 60, 60, "green");
+        this.player.setCollider(20, 30);
         this.actors = [];
         this.playerBullets = [];
 
@@ -188,9 +193,11 @@ class Game {
         // Move the bullets
         for (let bullet of this.playerBullets) {
             bullet.update(deltaTime);
+            bullet.updateCollider(deltaTime);
         }
         // Move the player
         this.player.update(deltaTime);
+        this.player.updateCollider(deltaTime);
 
         this.checkCollisions();
 
@@ -213,6 +220,7 @@ class Game {
         const posX = randomRange(canvasWidth - size);
         const posY = randomRange(canvasHeight - size);
         const box = new GameObject(new Vec(posX, posY), size, size, "grey");
+        box.setCollider(size, size);
         box.destroy = false;
         this.actors.push(box);
     }
@@ -285,6 +293,7 @@ class Game {
     // Instantiate a new bullet
     addBullet(clickX, clickY) {
         const bullet = new Bullet(game.player.position, 20, 6, "blue");
+        bullet.setCollider(20, 30);
         bullet.setVelocity(clickX, clickY);
         game.playerBullets.push(bullet);
     }

@@ -188,8 +188,6 @@ class Game {
             bullet.draw(ctx);
         }
         this.player.draw(ctx);
-        //this.player.drawBoundingBox(ctx);
-        //this.player.drawCollider(ctx);
     }
 
     update(deltaTime) {

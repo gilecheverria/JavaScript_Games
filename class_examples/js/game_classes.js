@@ -5,6 +5,16 @@
  * 2025-02-25
  */
 
+// Global variables to select whether to display bounding boxes and colliders
+let showBBox = false;
+let showColl = false;
+
+// Register event listeners to toggle bounding boxes
+window.addEventListener('keydown', event => {
+    if (event.key == 'y') showBBox = !showBBox;
+    if (event.key == 'u') showColl = !showColl;
+});
+
 class Vec {
     constructor(x, y) {
         this.x = x;
@@ -109,8 +119,8 @@ class GameObject {
                          this.width, this.height);
         }
 
-        //this.drawBoundingBox(ctx);
-        //this.drawCollider(ctx);
+        if (showBBox) this.drawBoundingBox(ctx);
+        if (showColl) this.drawCollider(ctx);
     }
 
     drawBoundingBox(ctx) {
@@ -123,7 +133,7 @@ class GameObject {
         ctx.stroke();
 
         ctx.fillStyle = "red";
-        ctx.fillRect(this.position.x - 1, this.position.y - 1, 2, 2);
+        ctx.fillRect(this.position.x - 2, this.position.y - 2, 4, 4);
     }
 
     drawCollider(ctx) {
@@ -184,6 +194,7 @@ class AnimatedObject extends GameObject {
     }
 }
 
+
 class TextLabel {
     constructor(x, y, font, color) {
         this.x = x;
@@ -202,11 +213,20 @@ class TextLabel {
 
 // Detect a collision of two box objects
 function boxOverlap(obj1, obj2) {
-    return obj1.position.x + obj1.width > obj2.position.x &&
-           obj1.position.x < obj2.position.x + obj2.width &&
-           obj1.position.y + obj1.height > obj2.position.y &&
-           obj1.position.y < obj2.position.y + obj2.height;
+    const obj1Left = obj1.position.x - obj1.width / 2;
+    const obj1Right = obj1.position.x + obj1.width / 2;
+    const obj1Top = obj1.position.y - obj1.height / 2;
+    const obj1Bottom = obj1.position.y + obj1.height / 2;
+    const obj2Left = obj2.position.x - obj2.width / 2;
+    const obj2Right = obj2.position.x + obj2.width / 2;
+    const obj2Top = obj2.position.y - obj2.height / 2;
+    const obj2Bottom = obj2.position.y + obj2.height / 2;
+    return obj1Right > obj2Left &&
+           obj1Left < obj2Right &&
+           obj1Bottom > obj2Top &&
+           obj1Top < obj2Bottom;
 }
+
 
 function randomRange(size, start) {
     return Math.floor(Math.random() * size) + ((start === undefined) ? 0 : start);

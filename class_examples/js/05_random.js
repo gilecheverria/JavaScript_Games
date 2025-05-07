@@ -90,7 +90,7 @@ class Game {
     }
 
     initObjects() {
-        this.player = new Player(new Vec(canvasWidth / 2, canvasHeight / 2), 60, 60, "red");
+        this.player = new Player(new Vec(canvasWidth / 2, canvasHeight / 2), 60, 60, "green");
 
         this.actors = [];
         for (let i=0; i<10; i++) {
