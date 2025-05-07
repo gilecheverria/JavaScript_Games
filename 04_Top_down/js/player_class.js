@@ -64,6 +64,7 @@ class Player extends Character {
             this.position = newPosition;
         }
 
+        this.updateHit(deltaTime);
         this.updateFrame(deltaTime);
     }
 

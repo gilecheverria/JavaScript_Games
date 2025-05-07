@@ -1,6 +1,9 @@
 /*
  * Description of the class for enemies in the game
  *
+ * Drawing enemies of different colors, following the instructions at:
+ * https://stackoverflow.com/questions/26502979/blending-different-images-in-canvas/26505047
+ *
  * Gilberto Echeverria
  * 2025-04-02
  */
@@ -16,6 +19,11 @@ class Enemy extends Character {
         this.attackTimer = 0;
         this.setMaxHP(100);
         this.moveDirection = "S";
+
+        // Random color overlay
+        const colors = ["#ffaaaa", "#aaffaa", "#aaaaff"];
+        const colorIndex = Math.floor(Math.random() * colors.length);
+        this.randomColor = colors[colorIndex];
     }
 
     update(level, deltaTime) {
@@ -52,6 +60,7 @@ class Enemy extends Character {
             }
         }
 
+        this.updateHit(deltaTime);
         this.updateFrame(deltaTime);
     }
 

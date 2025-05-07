@@ -58,12 +58,13 @@ class Game {
         this.bgMusicElement = document.createElement("audio");
         this.bgMusicElement.src = "../assets/music/sanctuary_dungeon.mp3";
         // Set the music to play again when it finishes
-        // As used at:
+        this.bgMusicElement.loop = true;
+        // A more complicated method, as used at:
         //https://stackoverflow.com/questions/3273552/html5-audio-looping
-        this.bgMusicElement.addEventListener("ended", function() {
-            this.currentTime = 0;
-            this.play();
-        }, false);
+        //this.bgMusicElement.addEventListener("ended", function() {
+        //    this.currentTime = 0;
+        //    this.play();
+        //}, false);
 
         //console.log(level);
         this.labelMoney = new TextLabel(20, canvasHeight - 30,
@@ -107,6 +108,7 @@ class Game {
                 } else if (actor.type == 'coin') {
                     this.player.money += 1;
                     this.actors = this.actors.filter(item => item !== actor);
+                    this.coinSoundElement.currentTime = 0;
                     this.coinSoundElement.play();
                 }
             }
@@ -234,6 +236,9 @@ function setEventListeners() {
         if (event.key == 'd') {
             game.player.startMovement("right");
         }
+
+        if (event.key == 'y') showBBox = !showBBox;
+        //if (event.key == 'u') showColl = !showColl;
 
         if (event.key == ' ') {
             if (game.state == "paused") {
