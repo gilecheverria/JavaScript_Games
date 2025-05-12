@@ -200,6 +200,7 @@ class Game {
         // Move the bullets
         for (let bullet of this.playerBullets) {
             bullet.update(deltaTime);
+            bullet.updateCollider();
         }
         for (let bullet of this.enemyBullets) {
             bullet.update(deltaTime);
@@ -267,7 +268,7 @@ class Game {
 
         // Enemy bullets with the player
         for (let bullet of this.enemyBullets) {
-            if (boxOverlap(bullet.collider, this.player.collider)) {
+            if (boxOverlap(bullet, this.player)) {
                 bullet.destroy = true;
                 this.player.destroy = true;
             }
