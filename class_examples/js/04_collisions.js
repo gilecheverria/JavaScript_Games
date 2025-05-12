@@ -76,6 +76,7 @@ class Game {
     update(deltaTime) {
         // Move the player
         this.player.update(deltaTime);
+        this.player.updateCollider();
 
         // Check collision against other objects
         for (let actor of this.actors) {

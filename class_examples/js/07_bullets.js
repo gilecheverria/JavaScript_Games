@@ -148,6 +148,7 @@ class Bullet extends GameObject {
         ctx.restore();
 
         if (showBBox) this.drawBoundingBox(ctx);
+        if (showColl) this.drawCollider(ctx);
     }
 }
 
@@ -164,7 +165,7 @@ class Game {
 
     initObjects() {
         this.player = new Player(new Vec(canvasWidth / 2, canvasHeight / 2), 60, 60, "green");
-        this.player.setCollider(20, 30);
+        this.player.setCollider(60, 60);
         this.actors = [];
         this.playerBullets = [];
 
@@ -293,7 +294,7 @@ class Game {
     // Instantiate a new bullet
     addBullet(clickX, clickY) {
         const bullet = new Bullet(game.player.position, 20, 6, "blue");
-        bullet.setCollider(20, 30);
+        bullet.setCollider(6, 6);
         bullet.setVelocity(clickX, clickY);
         game.playerBullets.push(bullet);
     }

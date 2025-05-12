@@ -52,6 +52,9 @@ class Rect {
         this.position = new Vec(x, y);
         this.width = width;
         this.height = height;
+
+        this.halfWidth = Math.floor(width / 2);
+        this.halfHeight = Math.floor(height / 2);
     }
 }
 
@@ -64,9 +67,16 @@ class GameObject {
         this.color = color;
         this.type = type;
 
+        this.halfWidth = Math.floor(width / 2);
+        this.halfHeight = Math.floor(height / 2);
+
         // Sprite properties
         this.spriteImage = undefined;
         this.spriteRect = undefined;
+
+
+        // Intialize a collider with the default object size
+        this.setCollider(width, height);
     }
 
     setSprite(imagePath, rect) {
@@ -80,13 +90,14 @@ class GameObject {
     setCollider(width, height) {
         let xMargin = (this.width - width) / 2;
         let yMargin = (this.height - height) / 2;
-        this.xOffset = this.width / 2 - xMargin;
-        this.yOffset = this.height / 2 - yMargin;
+        this.xOffset = this.halfWidth - xMargin;
+        this.yOffset = this.halfHeight - yMargin;
         this.colliderWidth = width;
         this.colliderHeight = height;
         this.updateCollider();
     }
 
+    // Create the collider directly as a rectangle to be tested
     updateCollider() {
         this.collider = new Rect(this.position.x - this.xOffset,
                                  this.position.y - this.yOffset,
@@ -101,21 +112,21 @@ class GameObject {
                               this.spriteRect.position.x, // * this.spriteRect.width,
                               this.spriteRect.position.y, // * this.spriteRect.height,
                               this.spriteRect.width, this.spriteRect.height,
-                              this.position.x - this.width / 2,
-                              this.position.y - this.height / 2,
+                              this.position.x - this.halfWidth,
+                              this.position.y - this.halfHeight,
                               this.width, this.height);
             } else {
                 ctx.drawImage(this.spriteImage,
-                              this.position.x - this.width / 2,
-                              this.position.y - this.height / 2,
+                              this.position.x - this.halfWidth,
+                              this.position.y - this.halfHeight,
                               this.width, this.height);
                               //this.position.x * scale, this.position.y * scale,
                               //this.width * scale, this.height * scale);
             }
         } else {
             ctx.fillStyle = this.color;
-            ctx.fillRect(this.position.x - this.width / 2,
-                         this.position.y - this.height / 2,
+            ctx.fillRect(this.position.x - this.halfWidth,
+                         this.position.y - this.halfHeight,
                          this.width, this.height);
         }
 
@@ -127,10 +138,15 @@ class GameObject {
         // Draw the bounding box of the sprite
         ctx.strokeStyle = "red";
         ctx.beginPath();
-        ctx.rect(this.position.x - this.width / 2,
-                 this.position.y - this.height / 2,
+        ctx.rect(this.position.x - this.halfWidth,
+                 this.position.y - this.halfHeight,
                  this.width, this.height);
         ctx.stroke();
+
+        ctx.fillStyle = "rgb(0.5, 0.5, 0.5, 0.5)";
+        ctx.fillRect(this.position.x - this.halfWidth,
+                     this.position.y - this.halfHeight,
+                     this.width, this.height);
 
         ctx.fillStyle = "red";
         ctx.fillRect(this.position.x - 2, this.position.y - 2, 4, 4);
@@ -213,14 +229,29 @@ class TextLabel {
 
 // Detect a collision of two box objects
 function boxOverlap(obj1, obj2) {
-    const obj1Left = obj1.position.x - obj1.width / 2;
-    const obj1Right = obj1.position.x + obj1.width / 2;
-    const obj1Top = obj1.position.y - obj1.height / 2;
-    const obj1Bottom = obj1.position.y + obj1.height / 2;
-    const obj2Left = obj2.position.x - obj2.width / 2;
-    const obj2Right = obj2.position.x + obj2.width / 2;
-    const obj2Top = obj2.position.y - obj2.height / 2;
-    const obj2Bottom = obj2.position.y + obj2.height / 2;
+    obj1 = obj1.collider;
+    obj2 = obj2.collider;
+    // Detect collisions with the rectangle directly
+    const obj1Left = obj1.position.x;
+    const obj1Right = obj1.position.x + obj1.width;
+    const obj1Top = obj1.position.y;
+    const obj1Bottom = obj1.position.y + obj1.height;
+    const obj2Left = obj2.position.x;
+    const obj2Right = obj2.position.x + obj2.width;
+    const obj2Top = obj2.position.y;
+    const obj2Bottom = obj2.position.y + obj2.height;
+    /*
+    // Detect collisions adjusting the rectangle to be centered
+    // around the object
+    const obj1Left = obj1.position.x - obj1.halfWidth;
+    const obj1Right = obj1.position.x + obj1.halfWidth;
+    const obj1Top = obj1.position.y - obj1.halfHeight;
+    const obj1Bottom = obj1.position.y + obj1.halfHeight;
+    const obj2Left = obj2.position.x - obj2.halfWidth;
+    const obj2Right = obj2.position.x + obj2.halfWidth;
+    const obj2Top = obj2.position.y - obj2.halfHeight;
+    const obj2Bottom = obj2.position.y + obj2.halfHeight;
+    */
     return obj1Right > obj2Left &&
            obj1Left < obj2Right &&
            obj1Bottom > obj2Top &&

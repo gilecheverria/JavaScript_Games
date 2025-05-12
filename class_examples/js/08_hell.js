@@ -364,6 +364,9 @@ function drawScene(newTime) {
     }
     let deltaTime = newTime - oldTime;
 
+    // Slow down time
+    deltaTime *= 0.5;
+
     // Clean the canvas so we can draw everything again
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
