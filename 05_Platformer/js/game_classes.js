@@ -49,6 +49,11 @@ class GameObject {
         this.type = type;
         this.showBox = false;
 
+        this.halfSize = new Vec(
+            Math.floor(width / 2),
+            Math.floor(height / 2)
+        );
+
         // Sprite properties
         this.spriteImage = undefined;
         this.spriteRect = undefined;
@@ -70,27 +75,43 @@ class GameObject {
                 ctx.drawImage(this.spriteImage,
                               this.spriteRect.x * this.spriteRect.width,
                               this.spriteRect.y * this.spriteRect.height,
-                              this.spriteRect.width, this.spriteRect.height,
-                              this.position.x * scale, this.position.y * scale,
-                              this.size.x * scale, this.size.y * scale);
+                              this.spriteRect.width,
+                              this.spriteRect.height,
+                              (this.position.x - this.halfSize.x) * scale,
+                              (this.position.y - this.halfSize.y) * scale,
+                              this.size.x * scale,
+                              this.size.y * scale);
             } else {
                 ctx.drawImage(this.spriteImage,
-                              this.position.x * scale, this.position.y * scale,
-                              this.size.x * scale, this.size.y * scale);
+                              (this.position.x - this.halfSize.x) * scale,
+                              (this.position.y - this.halfSize.y) * scale,
+                              this.size.x * scale,
+                              this.size.y * scale);
             }
         } else {
             // If there is no sprite asociated, just draw a color square
             ctx.fillStyle = this.color;
-            ctx.fillRect(this.position.x * scale, this.position.y * scale,
-                         this.size.x * scale, this.size.y * scale);
+            ctx.fillRect((this.position.x - this.halfSize.x) * scale,
+                         (this.position.y - this.halfSize.y) * scale,
+                         this.size.x * scale,
+                         this.size.y * scale);
         }
 
         // Display the bounding box
         if (this.showBox) {
-            ctx.strokeStyle = "black";
-            ctx.strokeRect(this.position.x * scale, this.position.y * scale,
-                           this.size.x * scale, this.size.y * scale);
+            this.drawBoundingBox(ctx, scale);
         }
+    }
+
+    drawBoundingBox(ctx, scale) {
+        // Draw the bounding box of the sprite
+        ctx.strokeStyle = "red";
+        ctx.beginPath();
+        ctx.rect((this.position.x - this.halfSize.x) * scale,
+                 (this.position.y - this.halfSize.y) * scale,
+                 this.size.x * scale,
+                 this.size.y * scale);
+        ctx.stroke();
     }
 
     update() {
