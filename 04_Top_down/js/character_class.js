@@ -87,8 +87,8 @@ class Character extends AnimatedObject {
         // This canvas will always use 'source-over'
         //ctx.globalCompositeOperation = "source-over";
         ctx.drawImage(this.tempCanvas,
-                      (this.position.x - this.size.x / 2) * scale,
-                      (this.position.y - this.size.y / 2) * scale,
+                      (this.position.x - this.halfSize.x) * scale,
+                      (this.position.y - this.halfSize.y) * scale,
                       this.size.x * scale,
                       this.size.y * scale);
 

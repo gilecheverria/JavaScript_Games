@@ -15,6 +15,10 @@ class GameObject {
         this.id = randomRange(9000, 1000);
         this.position = new Vec(x, y);
         this.size = new Vec(width, height);
+        this.halfSize = new Vec(
+            Math.floor(width / 2),
+            Math.floor(height / 2)
+        );
         this.color = color;
         this.type = type;
 
@@ -40,22 +44,22 @@ class GameObject {
                               this.spriteRect.y * this.spriteRect.height,
                               this.spriteRect.width,
                               this.spriteRect.height,
-                              (this.position.x - this.size.x / 2) * scale,
-                              (this.position.y - this.size.y / 2) * scale,
+                              (this.position.x - this.halfSize.x) * scale,
+                              (this.position.y - this.halfSize.y) * scale,
                               this.size.x * scale,
                               this.size.y * scale);
             } else {
                 ctx.drawImage(this.spriteImage,
-                              (this.position.x - this.size.x / 2) * scale,
-                              (this.position.y - this.size.y / 2) * scale,
+                              (this.position.x - this.halfSize.x) * scale,
+                              (this.position.y - this.halfSize.y) * scale,
                               this.size.x * scale,
                               this.size.y * scale);
             }
         } else {
             // If there is no sprite asociated, just draw a color square
             ctx.fillStyle = this.color;
-            ctx.fillRect((this.position.x - this.size.x / 2) * scale,
-                         (this.position.y - this.size.y / 2) * scale,
+            ctx.fillRect((this.position.x - this.halfSize.x) * scale,
+                         (this.position.y - this.halfSize.y) * scale,
                          this.size.x * scale,
                          this.size.y * scale);
         }
@@ -65,8 +69,8 @@ class GameObject {
         // Draw the bounding box of the sprite
         ctx.strokeStyle = "red";
         ctx.beginPath();
-        ctx.rect((this.position.x - this.size.x / 2) * scale,
-                 (this.position.y - this.size.y / 2) * scale,
+        ctx.rect((this.position.x - this.halfSize.x) * scale,
+                 (this.position.y - this.halfSize.y) * scale,
                  this.size.x * scale,
                  this.size.y * scale);
         ctx.stroke();
