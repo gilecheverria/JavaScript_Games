@@ -41,8 +41,8 @@ class Bullet extends AnimatedObject {
                       this.spriteRect.y * this.spriteRect.height,
                       this.spriteRect.width,
                       this.spriteRect.height,
-                      (this.position.x - this.size.x / 2) * scale,
-                      (this.position.y - this.size.y / 2) * scale,
+                      (this.position.x - this.halfSize.x) * scale,
+                      (this.position.y - this.halfSize.y) * scale,
                       this.size.x * scale,
                       this.size.y * scale);
         // Recover any previous transformations

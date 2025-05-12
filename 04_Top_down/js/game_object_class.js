@@ -16,8 +16,12 @@ class GameObject {
         this.position = new Vec(x, y);
         this.size = new Vec(width, height);
         this.halfSize = new Vec(
-            Math.floor(width / 2),
-            Math.floor(height / 2)
+            //Math.floor(width / 2),
+            //Math.floor(height / 2)
+            // No floor, since in this game the objects are being created
+            // with a size of 1x1
+            width / 2,
+            height / 2
         );
         this.color = color;
         this.type = type;
@@ -74,9 +78,6 @@ class GameObject {
                  this.size.x * scale,
                  this.size.y * scale);
         ctx.stroke();
-
-        ctx.fillStyle = "red";
-        ctx.fillRect(this.position.x - 2, this.position.y - 2, 4, 4);
     }
 
     update() {

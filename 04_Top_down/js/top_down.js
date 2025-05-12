@@ -25,7 +25,8 @@ let playerSpeed = 0.005;
 
 // Scale of the whole world, to be applied to all objects
 // Each unit in the level file will be drawn as these many square pixels
-const scale = 29;
+let scale = 29;
+let scaleText = undefined;
 
 
 class Coin extends AnimatedObject {
@@ -195,6 +196,12 @@ const levelChars = {
           startFrame: [3, 11]},
 };
 
+// Callback when the HTML slider for the scale is modified
+function updateSlider(value) {
+    scale = value;
+    scaleText.innerHTML = `Scale: ${scale}`;
+}
+
 
 function main() {
     // Set a callback for when the page is loaded,
@@ -208,6 +215,10 @@ function init() {
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
     ctx = canvas.getContext('2d');
+
+    if (!scaleText) {
+        scaleText = document.getElementById("scaleValue");
+    }
 
     gameStart();
 }
