@@ -7,8 +7,10 @@ class Bullet extends AnimatedObject {
         this.angle = 0;
     }
 
-    setVelocity(dirX, dirY) {
-        const moveVector = new Vec(dirX, dirY).minus(this.position).normalize();
+    // Compute the correct velocity angle to get to the destination
+    setVelocity(destinationX, destinationY) {
+        const moveVector = new Vec(destinationX, destinationY).minus(this.position).normalize();
+        // The angle is used to rotate the sprite
         this.angle = Math.atan2(moveVector.y, moveVector.x);
         this.velocity = moveVector.times(this.speed);
     }

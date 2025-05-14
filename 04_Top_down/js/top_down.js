@@ -15,18 +15,23 @@ const canvasHeight = 600;
 
 let canvas;
 let ctx;
+let canvasRect;
 
+// Timestamp for the previous frame
 let frameStart;
 
+// Global game variables
 let game;
 let level;
 
+// Speed in sprites per second, to be multiplied by the scale
 let playerSpeed = 0.005;
 
 // Scale of the whole world, to be applied to all objects
 // Each unit in the level file will be drawn as these many square pixels
 let scale = 29;
-let scaleText = undefined;
+// Variable with reference to the HTML slider to adjust the scale
+let scaleSlider = undefined;
 
 
 class Coin extends AnimatedObject {
@@ -98,7 +103,6 @@ class Game {
 
     playerInteraction() {
         // A copy of the full list to iterate over all of them
-        // DOES THIS WORK?
         let currentActors = this.actors;
         // Detect collisions
         for (let actor of currentActors) {
@@ -152,6 +156,21 @@ class Game {
         //this.labelDebug.draw(ctx, `Player bullets: ${this.playerBullets.length}`);
         //this.labelDebug.draw(ctx, `E0 ${this.enemies[0].id} ${this.enemies[0].moveDirection} | E1 ${this.enemies[1].id} ${this.enemies[1].moveDirection}`);
     }
+
+    addBullet(destinationX, destinationY) {
+        let item = levelChars["B"];
+        const bullet = new Bullet("red", 1, 1,
+                                    game.player.position.x,
+                                    game.player.position.y,
+                                    item.label);
+        let instanceRect = new Rect(...item.rectParams);
+        bullet.setSprite(item.sprite, instanceRect);
+        bullet.sheetCols = item.sheetCols;
+        bullet.setAnimation(...item.startFrame, true, 100);
+
+        bullet.setVelocity(destinationX, destinationY);
+        game.playerBullets.push(bullet);
+    }
 }
 
 
@@ -199,7 +218,7 @@ const levelChars = {
 // Callback when the HTML slider for the scale is modified
 function updateSlider(value) {
     scale = value;
-    scaleText.innerHTML = `Scale: ${scale}`;
+    scaleSlider.innerHTML = `Scale: ${scale}`;
 }
 
 
@@ -216,8 +235,11 @@ function init() {
     canvas.height = canvasHeight;
     ctx = canvas.getContext('2d');
 
-    if (!scaleText) {
-        scaleText = document.getElementById("scaleValue");
+    // Identify the location of the canvas within the window
+    canvasRect = canvas.getBoundingClientRect();
+
+    if (!scaleSlider) {
+        scaleSlider = document.getElementById("scaleValue");
     }
 
     gameStart();
@@ -281,27 +303,17 @@ function setEventListeners() {
     canvas.addEventListener("click", event => {
         // Detect left click
         if (event.button == 0) {
-            // Identify the location of the canvas within the window
-            const rect = canvas.getBoundingClientRect();
             // Get the coordinates where the mouse was in the window
             // Adjust those coordinates to the area of the canvas
             // Scale down the position by the drawing scale
-            const canX = (event.clientX - rect.left) / scale;
-            const canY = (event.clientY - rect.top) / scale;
+            const canvasClickX = (event.clientX - canvasRect.left) / scale;
+            const canvasClickY = (event.clientY - canvasRect.top) / scale;
             //console.log(`WINDOW CLICK at: ${event.clientX}, ${event.clientY}`);
-            //console.log(`CANVAS CLICK at: ${canX}, ${canY}`);
+            //console.log(`CANVAS CLICK at: ${canvasClickX}, ${canvasClickY}`);
             //console.log(`PLAYER POS: ${game.player.position.x}, ${game.player.position.y}`);
 
             // Create the bullet object
-            let item = levelChars["B"];
-            const bullet = new Bullet("red", 1, 1, game.player.position.x, game.player.position.y, item.label);
-            let instanceRect = new Rect(...item.rectParams);
-            bullet.setSprite(item.sprite, instanceRect);
-            bullet.sheetCols = item.sheetCols;
-            bullet.setAnimation(...item.startFrame, true, 100);
-
-            bullet.setVelocity(canX, canY);
-            game.playerBullets.push(bullet);
+            game.addBullet(canvasClickX, canvasClickY);
         }
     });
 }
