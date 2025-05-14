@@ -52,9 +52,6 @@ class Rect {
         this.position = new Vec(x, y);
         this.width = width;
         this.height = height;
-
-        this.halfWidth = Math.floor(width / 2);
-        this.halfHeight = Math.floor(height / 2);
     }
 }
 
@@ -62,8 +59,9 @@ class Rect {
 class GameObject {
     constructor(position, width, height, color, type) {
         this.position = position;
-        this.width = width;
-        this.height = height;
+        this.size = new Vec(width, height);
+        this.halfSize = new Vec(width / 2, height / 2);
+
         this.color = color;
         this.type = type;
 
@@ -88,8 +86,8 @@ class GameObject {
     }
 
     setCollider(width, height) {
-        let xMargin = (this.width - width) / 2;
-        let yMargin = (this.height - height) / 2;
+        let xMargin = (this.size.x - width) / 2;
+        let yMargin = (this.size.y - height) / 2;
         this.xOffset = this.halfWidth - xMargin;
         this.yOffset = this.halfHeight - yMargin;
         this.colliderWidth = width;
@@ -99,60 +97,71 @@ class GameObject {
 
     // Create the collider directly as a rectangle to be tested
     updateCollider() {
-        this.collider = new Rect(this.position.x - this.xOffset,
-                                 this.position.y - this.yOffset,
-                                 this.colliderWidth,
-                                 this.colliderHeight);
+        this.collider = new Rect(this.position.x - this.xOffset * scale,
+                                 this.position.y - this.yOffset * scale,
+                                 this.colliderWidth * scale,
+                                 this.colliderHeight * scale);
     }
 
-    draw(ctx) {
+    // Use a default scale of 1 if not provided
+    draw(ctx, scale = 1) {
         if (this.spriteImage) {
             if (this.spriteRect) {
                 ctx.drawImage(this.spriteImage,
-                              this.spriteRect.position.x, // * this.spriteRect.width,
-                              this.spriteRect.position.y, // * this.spriteRect.height,
-                              this.spriteRect.width, this.spriteRect.height,
-                              this.position.x - this.halfWidth,
-                              this.position.y - this.halfHeight,
-                              this.width, this.height);
+                              this.spriteRect.position.x,
+                              this.spriteRect.position.y,
+                              this.spriteRect.width,
+                              this.spriteRect.height,
+                              (this.position.x - this.halfSize.x * scale),
+                              (this.position.y - this.halfSize.y * scale),
+                              this.size.x * scale,
+                              this.size.y * scale);
             } else {
                 ctx.drawImage(this.spriteImage,
-                              this.position.x - this.halfWidth,
-                              this.position.y - this.halfHeight,
-                              this.width, this.height);
-                              //this.position.x * scale, this.position.y * scale,
-                              //this.width * scale, this.height * scale);
+                              (this.position.x - this.halfSize.x * scale),
+                              (this.position.y - this.halfSize.y * scale),
+                              this.size.x * scale,
+                              this.size.y * scale);
             }
         } else {
             ctx.fillStyle = this.color;
-            ctx.fillRect(this.position.x - this.halfWidth,
-                         this.position.y - this.halfHeight,
-                         this.width, this.height);
+            ctx.fillRect((this.position.x - this.halfSize.x * scale),
+                         (this.position.y - this.halfSize.y * scale),
+                         this.size.x * scale,
+                         this.size.y * scale);
         }
 
-        if (showBBox) this.drawBoundingBox(ctx);
-        if (showColl) this.drawCollider(ctx);
+        if (showBBox) this.drawBoundingBox(ctx, scale);
+        if (showColl) this.drawCollider(ctx, scale);
     }
 
-    drawBoundingBox(ctx) {
+    drawBoundingBox(ctx, scale) {
+        // Attempt to compose the overlay so it makes the image lighter
+        ctx.globalCompositeOperation = "screen";
+        // A transparent layer on top
+        ctx.fillStyle = "rgb(0.5, 0.5, 0.5, 0.3)";
+        ctx.fillRect((this.position.x - this.halfSize.x * scale),
+                     (this.position.y - this.halfSize.y * scale),
+                     this.size.x * scale,
+                     this.size.y * scale);
+        // Return to default composition type
+        ctx.globalCompositeOperation = "source-over";
+
         // Draw the bounding box of the sprite
         ctx.strokeStyle = "red";
         ctx.beginPath();
-        ctx.rect(this.position.x - this.halfWidth,
-                 this.position.y - this.halfHeight,
-                 this.width, this.height);
+        ctx.rect((this.position.x - this.halfSize.x * scale),
+                 (this.position.y - this.halfSize.y * scale),
+                 this.size.x * scale,
+                 this.size.y * scale);
         ctx.stroke();
 
-        ctx.fillStyle = "rgb(0.5, 0.5, 0.5, 0.5)";
-        ctx.fillRect(this.position.x - this.halfWidth,
-                     this.position.y - this.halfHeight,
-                     this.width, this.height);
-
+        // A dot in the center of the sprite
         ctx.fillStyle = "red";
         ctx.fillRect(this.position.x - 2, this.position.y - 2, 4, 4);
     }
 
-    drawCollider(ctx) {
+    drawCollider(ctx, scale) {
         ctx.strokeStyle = "white";
         ctx.beginPath();
         ctx.rect(this.collider.position.x,
@@ -169,7 +178,6 @@ class GameObject {
 }
 
 
-// Update 2025-03-12
 // Class to control the animation of characters and objects
 class AnimatedObject extends GameObject {
     constructor(position, width, height, color, type, sheetCols) {
@@ -229,33 +237,24 @@ class TextLabel {
 
 // Detect a collision of two box objects
 function boxOverlap(obj1, obj2) {
-    obj1 = obj1.collider;
-    obj2 = obj2.collider;
-    // Detect collisions with the rectangle directly
-    const obj1Left = obj1.position.x;
-    const obj1Right = obj1.position.x + obj1.width;
-    const obj1Top = obj1.position.y;
-    const obj1Bottom = obj1.position.y + obj1.height;
-    const obj2Left = obj2.position.x;
-    const obj2Right = obj2.position.x + obj2.width;
-    const obj2Top = obj2.position.y;
-    const obj2Bottom = obj2.position.y + obj2.height;
-    /*
-    // Detect collisions adjusting the rectangle to be centered
-    // around the object
-    const obj1Left = obj1.position.x - obj1.halfWidth;
-    const obj1Right = obj1.position.x + obj1.halfWidth;
-    const obj1Top = obj1.position.y - obj1.halfHeight;
-    const obj1Bottom = obj1.position.y + obj1.halfHeight;
-    const obj2Left = obj2.position.x - obj2.halfWidth;
-    const obj2Right = obj2.position.x + obj2.halfWidth;
-    const obj2Top = obj2.position.y - obj2.halfHeight;
-    const obj2Bottom = obj2.position.y + obj2.halfHeight;
-    */
-    return obj1Right > obj2Left &&
-           obj1Left < obj2Right &&
-           obj1Bottom > obj2Top &&
-           obj1Top < obj2Bottom;
+    // Get the colliders for the objects
+    col1 = obj1.collider;
+    col2 = obj2.collider;
+    // Identify the borders of each collider
+    const col1Left = col1.position.x;
+    const col1Right = col1.position.x + col1.width;
+    const col1Top = col1.position.y;
+    const col1Bottom = col1.position.y + col1.height;
+    const col2Left = col2.position.x;
+    const col2Right = col2.position.x + col2.width;
+    const col2Top = col2.position.y;
+    const col2Bottom = col2.position.y + col2.height;
+
+    // Compare to identify a collision
+    return col1Right > col2Left &&
+           col1Left < col2Right &&
+           col1Bottom > col2Top &&
+           col1Top < col2Bottom;
 }
 
 

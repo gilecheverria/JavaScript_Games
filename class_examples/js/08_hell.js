@@ -28,6 +28,8 @@ let bulletSpeed = 0.05;
 let bulletDelay = 80;
 let bulletAngleIncrement = Math.PI / 25.5;
 
+let scale = 1.5;
+
 // Dictionary for the keys that will control player movement
 const keyDirections = {
     w: 'up',
@@ -98,11 +100,11 @@ class Player extends GameObject {
 
 // Class for the bullets
 class Bullet extends GameObject {
-    constructor(position, width, height, color) {
+    constructor(position, width, height, color, speed) {
         super(position, width, height, color, "bullet");
         this.velocity = new Vec(0, 0);
         this.destroy = false;
-        this.speed = bulletSpeed;
+        this.speed = speed;
         this.angle = 0;
         // Bullets will dissapear after a limited time
         this.maxLife = 2000;
@@ -110,10 +112,8 @@ class Bullet extends GameObject {
     }
 
     setVelocity(dirX, dirY) {
-        // When sent the direction for the bullet
+        // Use the expected direction to set the speed
         const moveVector = new Vec(dirX, dirY).normalize();
-        // When sent the position of the mouse click
-        //const moveVector = new Vec(dirX, dirY).minus(this.position).normalize();
         this.angle = Math.atan2(moveVector.y, moveVector.x);
         this.velocity = moveVector.times(this.speed);
     }
@@ -136,7 +136,7 @@ class Bullet extends GameObject {
     }
 
     // Override the parent's draw method
-    draw(ctx) {
+    draw(ctx, scale) {
         // Store the current transformation matrix
         ctx.save();
         // Apply the required rotation around the bullet center
@@ -145,12 +145,9 @@ class Bullet extends GameObject {
         ctx.rotate(this.angle + Math.PI / 2);
         ctx.translate(-this.position.x, -this.position.y);
         // Draw the bullet
-        super.draw(ctx);
+        super.draw(ctx, scale);
         // Recover any previous transformations
         ctx.restore();
-
-        //this.drawBoundingBox(ctx);
-        //this.drawCollider(ctx);
     }
 }
 
@@ -180,14 +177,17 @@ class Game {
         this.enemyBullets = [];
     }
 
-    draw(ctx) {
+    draw(ctx, scale) {
         for (let actor of this.actors) {
-            actor.draw(ctx);
+            actor.draw(ctx, scale);
         }
         for (let bullet of this.enemyBullets) {
-            bullet.draw(ctx);
+            bullet.draw(ctx, scale);
         }
-        this.player.draw(ctx);
+        for (let bullet of this.playerBullets) {
+            bullet.draw(ctx, scale);
+        }
+        this.player.draw(ctx, scale);
     }
 
     update(deltaTime) {
@@ -290,7 +290,6 @@ class Game {
             }
         });
 
-        /*
         canvas.addEventListener('click', event => {
             if (event.button == 0) {
                 // Identify the location of the canvas within the window
@@ -305,7 +304,6 @@ class Game {
             }
 
         });
-        */
     }
 
     // Add directions to the keys array for character movement
@@ -324,13 +322,17 @@ class Game {
 
     // Instantiate a new bullet
     addBullet(clickX, clickY) {
-        const bullet = new Bullet(game.player.position, 20, 6, "blue");
-        bullet.setVelocity(clickX, clickY);
+        const bullet = new Bullet(game.player.position, 6, 20, "purple", bulletSpeed * 4);
+        bullet.setSprite("../assets/sprites/beams.png",
+                         new Rect(231, 221, 40, 66)); // Purple beams
+        bullet.setCollider(6, 6);
+        const moveVector = new Vec(clickX, clickY).minus(bullet.position).normalize();
+        bullet.setVelocity(moveVector.x, moveVector.y);
         game.playerBullets.push(bullet);
     }
 
     addEnemyBullet(originX, originY, destX, destY) {
-        const bullet = new Bullet(new Vec(originX, originY), 6, 12, "purple");
+        const bullet = new Bullet(new Vec(originX, originY), 6, 12, "blue", bulletSpeed);
         bullet.setSprite("../assets/sprites/beams.png",
                          new Rect(238, 96, 44, 92)); // Blue beams
                          //new Rect(231, 221, 40, 66)); // Purple beams
@@ -366,14 +368,14 @@ function drawScene(newTime) {
     let deltaTime = newTime - oldTime;
 
     // Slow down time
-    deltaTime *= 0.5;
+    //deltaTime *= 0.5;
 
     // Clean the canvas so we can draw everything again
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     game.update(deltaTime);
 
-    game.draw(ctx);
+    game.draw(ctx, scale);
 
     oldTime = newTime;
     requestAnimationFrame(drawScene);

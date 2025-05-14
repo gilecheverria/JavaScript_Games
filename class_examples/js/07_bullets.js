@@ -138,17 +138,10 @@ class Bullet extends GameObject {
         ctx.translate(this.position.x, this.position.y);
         ctx.rotate(this.angle);
         ctx.translate(-this.position.x, -this.position.y);
-        // Draw the bullet
-        ctx.fillStyle = this.color;
-        ctx.fillRect((this.position.x - this.width / 2),
-                     (this.position.y - this.height / 2),
-                     this.width,
-                     this.height);
+        // Draw the bullet with the parent's method
+        super.draw(ctx);
         // Recover any previous transformations
         ctx.restore();
-
-        if (showBBox) this.drawBoundingBox(ctx);
-        if (showColl) this.drawCollider(ctx);
     }
 }
 
