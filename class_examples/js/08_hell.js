@@ -82,6 +82,8 @@ class Player extends GameObject {
         this.position = this.position.plus(this.velocity.times(deltaTime));
 
         this.clampWithinCanvas();
+
+        this.updateCollider();
     }
 
     clampWithinCanvas() {
@@ -122,6 +124,7 @@ class Bullet extends GameObject {
         this.position = this.position.plus(this.velocity.times(deltaTime));
 
         this.checkAlive();
+        this.updateCollider();
     }
 
     checkAlive() {
@@ -200,15 +203,12 @@ class Game {
         // Move the bullets
         for (let bullet of this.playerBullets) {
             bullet.update(deltaTime);
-            bullet.updateCollider();
         }
         for (let bullet of this.enemyBullets) {
             bullet.update(deltaTime);
-            bullet.updateCollider();
         }
         // Move the player
         this.player.update(deltaTime);
-        this.player.updateCollider();
 
         this.checkCollisions();
 

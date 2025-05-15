@@ -61,17 +61,12 @@ class GameObject {
         this.position = position;
         this.size = new Vec(width, height);
         this.halfSize = new Vec(width / 2, height / 2);
-
         this.color = color;
         this.type = type;
-
-        this.halfWidth = Math.floor(width / 2);
-        this.halfHeight = Math.floor(height / 2);
 
         // Sprite properties
         this.spriteImage = undefined;
         this.spriteRect = undefined;
-
 
         // Intialize a collider with the default object size
         this.setCollider(width, height);
@@ -88,8 +83,8 @@ class GameObject {
     setCollider(width, height) {
         let xMargin = (this.size.x - width) / 2;
         let yMargin = (this.size.y - height) / 2;
-        this.xOffset = this.halfWidth - xMargin;
-        this.yOffset = this.halfHeight - yMargin;
+        this.xOffset = this.halfSize.x - xMargin;
+        this.yOffset = this.halfSize.y - yMargin;
         this.colliderWidth = width;
         this.colliderHeight = height;
         this.updateCollider();
@@ -161,7 +156,7 @@ class GameObject {
         ctx.fillRect(this.position.x - 2, this.position.y - 2, 4, 4);
     }
 
-    drawCollider(ctx, scale) {
+    drawCollider(ctx) {
         ctx.strokeStyle = "white";
         ctx.beginPath();
         ctx.rect(this.collider.position.x,
