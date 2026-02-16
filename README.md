@@ -7,7 +7,8 @@ Test games done using JavaScript
 
 - https://learnjavascript.online/
 - https://eloquentjavascript.net/
-
+- https://learnxinyminutes.com/
+- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference
 - https://developer.mozilla.org/en-US/docs/Games
 
 ### Using Mocha for unit testing
@@ -22,6 +23,11 @@ npm test
 To run individual files, from the root directory:
 ```bash
 npm test test/<test_file>
+```
+
+Another way to run tests:
+```bash
+npx mocha test/<test_file> --reporter spec
 ```
 
 
