@@ -1,10 +1,53 @@
 /*
  * Practice functions for Javascript
+ * This file contains all the working functions
  *
  * Gilberto Echeverria
  * 2025-02-10
  */
 
+/*
+ * Find the first character inside a string that appears only once
+ * Solution using a list of objects with the counters for each letter
+ *
+ * Arguments:
+ *  str: the string to search
+ * Returns:
+ *  The first non-repeating character in the string, or undefined if there is none
+ */
+export function firstNonRepeating(str) {
+    // Create an empty array to store the candidates
+    const candidates = [];
+    // Check every character in the string
+    for (let i=0; i<str.length; i++) {
+        // Compare against the candidates
+        let found = false;
+        for (let cand of candidates) {
+            // If the char had already been found, increase its counter
+            if (cand.char == str[i]) {
+                cand.count += 1;
+                found = true;
+            }
+        }
+        // If the char was not found, add it to the list
+        if (!found) {
+            candidates.push({char: str[i], count: 1});
+        }
+    }
+
+    // Show the data structure generated
+    // A list of objects
+    //console.log(candidates);
+
+    // Look for the first char that appeared only once
+    for (let index in candidates) {
+        if (candidates[index].count == 1) {
+            return candidates[index].char;
+        }
+    }
+}
+
+/*
 export function firstNonRepeating(string) {
     for (let i=0; i<string.length; i++) {
         let repeated = false;
@@ -21,6 +64,7 @@ export function firstNonRepeating(string) {
     }
     return undefined;
 }
+*/
 
 export function bubbleSort(data) {
     for (let i=0; i<data.length; i++) {
