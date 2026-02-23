@@ -1,0 +1,16 @@
+{
+  "name": "javascript games",
+  "version": "1.0.0",
+  "description": "Basic games written in JavaScript",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Gilberto Echeverria",
+  "license": "ISC",
+  "dependencies": {
+    "mocha": "^11.3.0",
+    "vite": "^7.3.1"
+  }
+}
