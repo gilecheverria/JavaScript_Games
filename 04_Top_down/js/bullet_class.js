@@ -27,6 +27,7 @@ class Bullet extends AnimatedObject {
         }
 
         this.updateFrame(deltaTime);
+        this.updateCollider();
     }
 
     // Override the parent's draw method

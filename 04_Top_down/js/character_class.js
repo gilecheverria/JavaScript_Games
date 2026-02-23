@@ -93,7 +93,7 @@ class Character extends AnimatedObject {
                       this.size.y * scale);
 
         if (showBBox) this.drawBoundingBox(ctx, scale);
-        //if (showColl) this.drawCollider(ctx, scale);
+        if (showColl) this.drawCollider(ctx, scale);
     }
 
     updateHit(deltaTime) {

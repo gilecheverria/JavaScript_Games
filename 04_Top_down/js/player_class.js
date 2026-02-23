@@ -66,6 +66,7 @@ class Player extends Character {
 
         this.updateHit(deltaTime);
         this.updateFrame(deltaTime);
+        this.updateCollider();
     }
 
     startMovement(direction) {

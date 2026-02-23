@@ -271,7 +271,7 @@ function setEventListeners() {
         }
 
         if (event.key == 'y') showBBox = !showBBox;
-        //if (event.key == 'u') showColl = !showColl;
+        if (event.key == 'u') showColl = !showColl;
 
         if (event.key == ' ') {
             if (game.state == "paused") {

@@ -62,6 +62,7 @@ class Enemy extends Character {
 
         this.updateHit(deltaTime);
         this.updateFrame(deltaTime);
+        this.updateCollider();
     }
 
     selectAnimation() {
