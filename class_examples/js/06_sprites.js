@@ -7,6 +7,11 @@
 
 "use strict";
 
+//import { Vector } from "./libs/Vector";
+//import { Rect } from "./libs/Rect";
+//import { AnimatedObject } from "./libs/AnimatedObject";
+//import { boxOverlap } from "./libs/game_functions";
+
 // Global variables
 const canvasWidth = 800;
 const canvasHeight = 600;
@@ -27,7 +32,7 @@ let animationDelay = 200;
 class Player extends AnimatedObject {
     constructor(position, width, height, color, sheetCols) {
         super(position, width, height, color, "player", sheetCols);
-        this.velocity = new Vec(0, 0);
+        this.velocity = new Vector(0, 0);
     }
 
     update(deltaTime) {
@@ -43,6 +48,7 @@ class Player extends AnimatedObject {
             this.position.x = canvasWidth - this.width;
         }
         this.updateFrame(deltaTime);
+        this.updateCollider();
     }
 }
 
@@ -55,7 +61,7 @@ class Game {
     }
 
     initObjects() {
-        this.player = new Player(new Vec(canvasWidth / 2, canvasHeight / 2), 60, 60, "red", 3);
+        this.player = new Player(new Vector(canvasWidth / 2, canvasHeight / 2), 60, 60, "red", 3);
         //this.player.setSprite('../assets/sprites/link_front.png')
         this.player.setSprite('../assets/sprites/blordrough_quartermaster-NESW.png',
                               new Rect(48, 128, 48, 64));
@@ -146,3 +152,5 @@ function drawScene(newTime) {
     oldTime = newTime;
     requestAnimationFrame(drawScene);
 }
+
+//main();

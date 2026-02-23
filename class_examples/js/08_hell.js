@@ -9,6 +9,13 @@
 
 "use strict";
 
+import { Vector } from "./libs/Vector";
+import { Rect } from "./libs/Rect";
+import { GameObject } from "./libs/GameObject";
+import { Player } from "./libs/Player";
+import { Bullet } from "./libs/Bullet";
+import { boxOverlap, randomRange } from "./libs/game_functions";
+
 // Global variables
 const canvasWidth = 800;
 const canvasHeight = 600;
@@ -38,121 +45,6 @@ const keyDirections = {
     d: 'right',
 };
 
-// Class for the main character in the game
-class Player extends GameObject {
-    constructor(position, width, height, color) {
-        super(position, width, height, color, "player");
-        this.velocity = new Vec(0, 0);
-
-        this.motion = {
-            up: {
-                axis: "y",
-                sign: -1,
-            },
-            left: {
-                axis: "x",
-                sign: -1,
-            },
-            down: {
-                axis: "y",
-                sign: 1,
-            },
-            right: {
-                axis: "x",
-                sign: 1,
-            },
-        }
-
-        // Keys pressed to move the player
-        this.keys = [];
-    }
-
-    update(deltaTime) {
-        // Restart the velocity
-        this.velocity.x = 0;
-        this.velocity.y = 0;
-        // Modify the velocity according to the directions pressed
-        for (const direction of this.keys) {
-            const axis = this.motion[direction].axis;
-            const sign = this.motion[direction].sign;
-            this.velocity[axis] += sign;
-        }
-        // Normalize the velocity to avoid greater speed on diagonals
-        this.velocity = this.velocity.normalize().times(playerSpeed);
-        this.position = this.position.plus(this.velocity.times(deltaTime));
-
-        this.clampWithinCanvas();
-
-        this.updateCollider();
-    }
-
-    clampWithinCanvas() {
-        if (this.position.y < 0) {
-            this.position.y = 0;
-        } else if (this.position.y + this.height > canvasHeight) {
-            this.position.y = canvasHeight - this.height;
-        } else if (this.position.x < 0) {
-            this.position.x = 0;
-        } else if (this.position.x + this.width > canvasWidth) {
-            this.position.x = canvasWidth - this.width;
-        }
-    }
-}
-
-
-// Class for the bullets
-class Bullet extends GameObject {
-    constructor(position, width, height, color, speed) {
-        super(position, width, height, color, "bullet");
-        this.velocity = new Vec(0, 0);
-        this.destroy = false;
-        this.speed = speed;
-        this.angle = 0;
-        // Bullets will dissapear after a limited time
-        this.maxLife = 2000;
-        this.lifeTime = 0;
-    }
-
-    setVelocity(dirX, dirY) {
-        // Use the expected direction to set the speed
-        const moveVector = new Vec(dirX, dirY).normalize();
-        this.angle = Math.atan2(moveVector.y, moveVector.x);
-        this.velocity = moveVector.times(this.speed);
-    }
-
-    update(deltaTime) {
-        this.position = this.position.plus(this.velocity.times(deltaTime));
-
-        this.checkAlive();
-        this.updateCollider();
-    }
-
-    checkAlive() {
-        if (this.lifeTime > this.maxLife ||
-            this.position.y < 0 ||
-            this.position.y > canvasHeight ||
-            this.position.x < 0 ||
-            this.position.x > canvasWidth) {
-            // Mark the bullet to be destroyed in the next frame
-            this.destroy = true;
-        }
-    }
-
-    // Override the parent's draw method
-    draw(ctx, scale) {
-        // Store the current transformation matrix
-        ctx.save();
-        // Apply the required rotation around the bullet center
-        ctx.translate(this.position.x, this.position.y);
-        // Add 90 degrees to the angle because of the orientation of the sprites
-        ctx.rotate(this.angle + Math.PI / 2);
-        ctx.translate(-this.position.x, -this.position.y);
-        // Draw the bullet
-        super.draw(ctx, scale);
-        // Recover any previous transformations
-        ctx.restore();
-    }
-}
 
 
 // Class to keep track of all the events and objects in the game
@@ -171,26 +63,28 @@ class Game {
     }
 
     initObjects() {
-        this.player = new Player(new Vec(canvasWidth / 2, canvasHeight / 4 * 3), 40, 40, "yellow");
+        this.player = new Player(new Vector(canvasWidth / 2, canvasHeight / 4 * 3), 40, 40, "yellow");
         this.player.setSprite("../assets/sprites/nightraidervertical.png");
         this.player.setCollider(20, 30);
+        this.player.setSpeed(playerSpeed );
+        this.player.setScale(scale);
 
         this.actors = [];
         this.playerBullets = [];
         this.enemyBullets = [];
     }
 
-    draw(ctx, scale) {
+    draw(ctx) {
         for (let actor of this.actors) {
-            actor.draw(ctx, scale);
+            actor.draw(ctx);
         }
         for (let bullet of this.enemyBullets) {
-            bullet.draw(ctx, scale);
+            bullet.draw(ctx);
         }
         for (let bullet of this.playerBullets) {
-            bullet.draw(ctx, scale);
+            bullet.draw(ctx);
         }
-        this.player.draw(ctx, scale);
+        this.player.draw(ctx);
     }
 
     update(deltaTime) {
@@ -202,13 +96,13 @@ class Game {
         this.enemyBullets = this.enemyBullets.filter(bullet => !bullet.destroy);
         // Move the bullets
         for (let bullet of this.playerBullets) {
-            bullet.update(deltaTime);
+            bullet.update(deltaTime, ctx.canvas);
         }
         for (let bullet of this.enemyBullets) {
-            bullet.update(deltaTime);
+            bullet.update(deltaTime, ctx.canvas);
         }
         // Move the player
-        this.player.update(deltaTime);
+        this.player.update(deltaTime, ctx.canvas);
 
         this.checkCollisions();
 
@@ -250,7 +144,7 @@ class Game {
         const size = randomRange(50, 50);
         const posX = randomRange(canvasWidth - size);
         const posY = randomRange(canvasHeight - size);
-        const box = new GameObject(new Vec(posX, posY), size, size, "grey");
+        const box = new GameObject(new Vector(posX, posY), size, size, "grey");
         box.destroy = false;
         this.actors.push(box);
     }
@@ -259,7 +153,7 @@ class Game {
         // Check collision against other objects
         for (let actor of this.actors) {
             // With the player
-            if (boxOverlap(this.player, actor)) {
+            if (boxOverlap(this.player.collider, actor.collider)) {
                 actor.color = "yellow";
             } else {
                 actor.color = "grey";
@@ -268,7 +162,7 @@ class Game {
 
         // Enemy bullets with the player
         for (let bullet of this.enemyBullets) {
-            if (boxOverlap(bullet, this.player)) {
+            if (boxOverlap(bullet.collider, this.player.collider)) {
                 bullet.destroy = true;
                 this.player.destroy = true;
             }
@@ -326,18 +220,23 @@ class Game {
         bullet.setSprite("../assets/sprites/beams.png",
                          new Rect(231, 221, 40, 66)); // Purple beams
         bullet.setCollider(6, 6);
-        const moveVector = new Vec(clickX, clickY).minus(bullet.position).normalize();
+        // Compute the direction for the bullet movement,
+        // based on the position of the mouse
+        const moveVector = new Vector(clickX, clickY).minus(bullet.position).normalize();
         bullet.setVelocity(moveVector.x, moveVector.y);
+        bullet.setSpriteRotation(Math.PI / 2);
+        bullet.setScale(scale);
         game.playerBullets.push(bullet);
     }
 
     addEnemyBullet(originX, originY, destX, destY) {
-        const bullet = new Bullet(new Vec(originX, originY), 6, 12, "blue", bulletSpeed);
+        const bullet = new Bullet(new Vector(originX, originY), 6, 12, "blue", bulletSpeed);
         bullet.setSprite("../assets/sprites/beams.png",
                          new Rect(238, 96, 44, 92)); // Blue beams
-                         //new Rect(231, 221, 40, 66)); // Purple beams
         bullet.setCollider(6, 6);
         bullet.setVelocity(destX, destY);
+        bullet.setSpriteRotation(Math.PI / 2);
+        bullet.setScale(scale);
         game.enemyBullets.push(bullet);
     }
 }
@@ -373,6 +272,10 @@ function drawScene(newTime) {
     // Clean the canvas so we can draw everything again
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
+    // fill the entire canvas with black before drawing the circles
+    ctx.fillStyle = "rgb(80, 40, 100)"
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     game.update(deltaTime);
 
     game.draw(ctx, scale);
@@ -380,3 +283,6 @@ function drawScene(newTime) {
     oldTime = newTime;
     requestAnimationFrame(drawScene);
 }
+
+
+main();

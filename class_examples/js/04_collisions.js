@@ -7,6 +7,10 @@
 
 "use strict";
 
+//import { Vector } from "./libs/Vector";
+//import { GameObject } from "./libs/GameObject";
+//import { boxOverlap } from "./libs/game_functions";
+
 // Global variables
 const canvasWidth = 800;
 const canvasHeight = 600;
@@ -20,30 +24,35 @@ let game;
 // Variable to store the time at the previous frame
 let oldTime;
 
-let playerSpeed = 0.2;
+let playerSpeed = 0.5;
 
 // Class for the main character in the game
 class Player extends GameObject {
-    constructor(position, width, height, color, sheetCols) {
-        super(position, width, height, color, "player", sheetCols);
-        this.velocity = new Vec(0, 0);
+    constructor(position, width, height, color) {
+        super(position, width, height, color, "player");
+        this.velocity = new Vector(0, 0);
     }
 
     update(deltaTime) {
         this.position = this.position.plus(this.velocity.times(deltaTime));
 
         this.clampWithinCanvas();
+        this.updateCollider();
     }
 
     clampWithinCanvas() {
         if (this.position.y < 0) {
             this.position.y = 0;
-        } else if (this.position.y + this.height > canvasHeight) {
-            this.position.y = canvasHeight - this.height;
+        } else if (this.position.y > canvasHeight) {
+            this.position.y = canvasHeight;
+        //} else if (this.position.y + this.height > canvasHeight) {
+            //this.position.y = canvasHeight - this.height;
         } else if (this.position.x < 0) {
             this.position.x = 0;
-        } else if (this.position.x + this.width > canvasWidth) {
-            this.position.x = canvasWidth - this.width;
+        } else if (this.position.x > canvasWidth) {
+            this.position.x = canvasWidth;
+        //} else if (this.position.x + this.width > canvasWidth) {
+            //this.position.x = canvasWidth - this.width;
         }
     }
 }
@@ -57,12 +66,20 @@ class Game {
     }
 
     initObjects() {
-        this.player = new Player(new Vec(canvasWidth / 2, canvasHeight / 2), 60, 60, "green");
+        const playerSize = 60;
+        const obstacleSize = 80;
 
+        // Create the player object
+        this.player = new Player(new Vector(canvasWidth / 2, canvasHeight / 2),
+                                 playerSize, playerSize, "green");
+
+        // Create the obstacle objects
         this.actors = [];
-        const box1 = new GameObject(new Vec(300, 300), 80, 80, "grey");
+        const box1 = new GameObject(new Vector(300, 300),
+                                    obstacleSize, obstacleSize, "grey");
         this.actors.push(box1);
-        const box2 = new GameObject(new Vec(600, 500), 80, 80, "grey");
+        const box2 = new GameObject(new Vector(600, 500),
+                                    obstacleSize, obstacleSize, "grey");
         this.actors.push(box2);
     }
 
@@ -76,11 +93,10 @@ class Game {
     update(deltaTime) {
         // Move the player
         this.player.update(deltaTime);
-        this.player.updateCollider();
 
         // Check collision against other objects
         for (let actor of this.actors) {
-            if (boxOverlap(this.player, actor)) {
+            if (boxOverlap(this.player.collider, actor.collider)) {
                 actor.color = "yellow";
             } else {
                 actor.color = "grey";

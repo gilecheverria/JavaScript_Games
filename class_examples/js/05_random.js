@@ -7,6 +7,11 @@
 
 "use strict";
 
+//import { Vector } from "./libs/Vector";
+//import { GameObject } from "./libs/GameObject";
+//import { Player } from "./libs/Player";
+//import { boxOverlap, randomRange } from "./libs/game_functions";
+
 // Global variables
 const canvasWidth = 800;
 const canvasHeight = 600;
@@ -22,65 +27,6 @@ let oldTime;
 
 let playerSpeed = 0.5;
 
-// Class for the main character in the game
-class Player extends GameObject {
-    constructor(position, width, height, color, sheetCols) {
-        super(position, width, height, color, "player", sheetCols);
-        this.velocity = new Vec(0, 0);
-
-        this.motion = {
-            up: {
-                axis: "y",
-                sign: -1,
-            },
-            left: {
-                axis: "x",
-                sign: -1,
-            },
-            down: {
-                axis: "y",
-                sign: 1,
-            },
-            right: {
-                axis: "x",
-                sign: 1,
-            },
-        }
-
-        // Keys pressed to move the player
-        this.keys = [];
-    }
-
-    update(deltaTime) {
-        // Restart the velocity
-        this.velocity.x = 0;
-        this.velocity.y = 0;
-        // Modify the velocity according to the directions pressed
-        for (const direction of this.keys) {
-            const axis = this.motion[direction].axis;
-            const sign = this.motion[direction].sign;
-            this.velocity[axis] += sign;
-        }
-        // Normalize the velocity to avoid greater speed on diagonals
-        this.velocity = this.velocity.normalize().times(playerSpeed);
-        this.position = this.position.plus(this.velocity.times(deltaTime));
-
-        this.clampWithinCanvas();
-    }
-
-    clampWithinCanvas() {
-        if (this.position.y < 0) {
-            this.position.y = 0;
-        } else if (this.position.y + this.height > canvasHeight) {
-            this.position.y = canvasHeight - this.height;
-        } else if (this.position.x < 0) {
-            this.position.x = 0;
-        } else if (this.position.x + this.width > canvasWidth) {
-            this.position.x = canvasWidth - this.width;
-        }
-    }
-}
-
 
 // Class to keep track of all the events and objects in the game
 class Game {
@@ -90,7 +36,8 @@ class Game {
     }
 
     initObjects() {
-        this.player = new Player(new Vec(canvasWidth / 2, canvasHeight / 2), 60, 60, "green");
+        this.player = new Player(new Vector(canvasWidth / 2, canvasHeight / 2), 60, 60, "red");
+        this.player.setSpeed(playerSpeed);
 
         this.actors = [];
         for (let i=0; i<10; i++) {
@@ -107,12 +54,11 @@ class Game {
 
     update(deltaTime) {
         // Move the player
-        this.player.update(deltaTime);
-        this.player.updateCollider();
+        this.player.update(deltaTime, ctx.canvas);
 
         // Check collision against other objects
         for (let actor of this.actors) {
-            if (boxOverlap(this.player, actor)) {
+            if (boxOverlap(this.player.collider, actor.collider)) {
                 actor.color = "yellow";
             } else {
                 actor.color = "grey";
@@ -125,7 +71,7 @@ class Game {
         const size = randomRange(50, 50);
         const posX = randomRange(canvasWidth - size);
         const posY = randomRange(canvasHeight - size);
-        const box = new GameObject(new Vec(posX, posY), size, size, "grey");
+        const box = new GameObject(new Vector(posX, posY), size, size, "grey");
         box.destroy = false;
         this.actors.push(box);
     }
@@ -204,3 +150,5 @@ function drawScene(newTime) {
     oldTime = newTime;
     requestAnimationFrame(drawScene);
 }
+
+//main();

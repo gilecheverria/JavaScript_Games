@@ -7,6 +7,11 @@
 
 "use strict";
 
+//import { Vector } from "./libs/Vector";
+//import { GameObject } from "./libs/GameObject";
+//import { TextLabel } from "./libs/TextLabel";
+//import { boxOverlap } from "./libs/game_functions";
+
 // Global variables
 const canvasWidth = 800;
 const canvasHeight = 600;
@@ -35,37 +40,39 @@ class Ball extends GameObject {
     update(deltaTime) {
         // Update the position using a constant velocity
         this.position = this.position.plus(this.velocity.times(deltaTime));
+        this.updateCollider();
     }
 
     initVelocity() {
         this.inPlay = true;
         let angle = Math.random() * (Math.PI / 2) - (Math.PI / 4);
-        this.velocity = new Vec(Math.cos(angle), Math.sin(angle)).times(initialSpeed);
+        this.velocity = new Vector(Math.cos(angle), Math.sin(angle)).times(initialSpeed);
         // Select a random direction for the serve
         this.velocity.x *= (Math.random() < 0.5) ? 1 : -1;
     }
 
     reset() {
         this.inPlay = false;
-        this.position = new Vec(canvasWidth / 2, canvasHeight / 2);
-        this.velocity = new Vec(0, 0);
+        this.position = new Vector(canvasWidth / 2, canvasHeight / 2);
+        this.velocity = new Vector(0, 0);
     }
 }
 
 class Paddle extends GameObject {
     constructor(position, width, height, color) {
         super(position, width, height, color, "paddle");
-        this.velocity = new Vec(0.0, 0.0);
+        this.velocity = new Vector(0.0, 0.0);
     }
 
     update(deltaTime) {
         this.position = this.position.plus(this.velocity.times(deltaTime));
 
-        if (this.position.y - this.height / 2 < 0) {
-            this.position.y = this.height / 2;
-        } else if (this.position.y + this.height / 2 > canvasHeight) {
-            this.position.y = canvasHeight - this.height / 2;
+        if (this.position.y < 0) {
+            this.position.y = 0;
+        } else if (this.position.y > canvasHeight) {
+            this.position.y = canvasHeight;
         }
+        this.updateCollider();
     }
 }
 
@@ -73,19 +80,26 @@ class Paddle extends GameObject {
 class Game {
     constructor(canvasWidth, canvasHeight) {
         // An object to represent the box to be displayed
-        this.box = new Ball(new Vec(canvasWidth / 2, canvasHeight / 2), 20, 20, "green");
+        this.box = new Ball(new Vector(canvasWidth / 2, canvasHeight / 2), 20, 20, "red");
         // The paddles that will be controlled by the players
-        this.leftPaddle = new Paddle(new Vec(40, canvasHeight / 2), 20, 100, "blue");
-        this.rightPaddle = new Paddle(new Vec(canvasWidth - 40, canvasHeight / 2), 20, 100, "blue");
+        this.leftPaddle = new Paddle(new Vector(30, canvasHeight / 2), 20, 100, "blue");
+        this.rightPaddle = new Paddle(new Vector(canvasWidth - 50, canvasHeight / 2), 20, 100, "blue");
         // Top and bottom bars where the ball can bounce
-        this.topBar = new GameObject(new Vec(canvasWidth / 2, 10), canvasWidth, 20, "black", "obstacle");
-        this.bottomBar = new GameObject(new Vec(canvasWidth / 2, canvasHeight - 10), canvasWidth, 20, "black", "obstacle");
+        this.topBar = new GameObject(new Vector(canvasWidth / 2, 0), canvasWidth, 20, "black", "obstacle");
+        this.bottomBar = new GameObject(new Vector(canvasWidth / 2, canvasHeight - 20), canvasWidth, 20, "black", "obstacle");
         // Goals on the sides. If the ball touches them a player scores
-        this.leftGoal = new GameObject(new Vec(-10, canvasHeight / 2), 40, canvasHeight, "yellow", "leftGoal");
-        this.rightGoal = new GameObject(new Vec(canvasWidth + 10, canvasHeight / 2), 40, canvasHeight, "yellow", "rightGoal");
+        this.leftGoal = new GameObject(new Vector(8, canvasHeight / 2), 6, canvasHeight, "green", "leftGoal");
+        this.rightGoal = new GameObject(new Vector(canvasWidth - 8, canvasHeight / 2), 6, canvasHeight, "green", "rightGoal");
         // Text labels to show the game score
         this.leftLabel = new TextLabel(200, 100, "40px Ubuntu Mono", "white")
         this.rightLabel = new TextLabel(600, 100, "40px Ubuntu Mono", "white")
+
+        //console.log("BOX:");
+        //console.log(this.box);
+        //console.log("LEFT PADDLE:");
+        //console.log(this.leftPaddle);
+        //console.log("RIGHT PADDLE:");
+        //console.log(this.rightPaddle);
 
         this.leftScore = 0;
         this.rightScore = 0;
@@ -95,21 +109,21 @@ class Game {
 
     update(deltaTime) {
         // Identify if the ball hits a paddle, then bounce back horizontally
-        if (boxOverlap(this.box, this.leftPaddle) || boxOverlap(this.box, this.rightPaddle)) {
+        if (boxOverlap(this.box.collider, this.leftPaddle.collider) || boxOverlap(this.box.collider, this.rightPaddle.collider)) {
             this.box.velocity.x *= -1;
             this.box.velocity = this.box.velocity.times(speedIncrease);
         }
         // If the ball hits a wall, bounce back vertically
-        if (boxOverlap(this.box, this.topBar) || boxOverlap(this.box, this.bottomBar)) {
+        if (boxOverlap(this.box.collider, this.topBar.collider) || boxOverlap(this.box.collider, this.bottomBar.collider)) {
             this.box.velocity.y *= -1;
             this.box.velocity = this.box.velocity.times(speedIncrease);
         }
         // Score when the ball hits a goal
-        if (boxOverlap(this.box, this.leftGoal)) {
+        if (boxOverlap(this.box.collider, this.leftGoal.collider)) {
             this.rightScore += 1;
             this.box.reset();
         }
-        if (boxOverlap(this.box, this.rightGoal)) {
+        if (boxOverlap(this.box.collider, this.rightGoal.collider)) {
             this.leftScore += 1;
             this.box.reset();
         }
@@ -137,25 +151,25 @@ class Game {
     createEventListeners() {
         window.addEventListener('keydown', (event) => {
             if (event.key == 'q') {
-                this.leftPaddle.velocity = new Vec(0, -paddleVelocity);
+                this.leftPaddle.velocity = new Vector(0, -paddleVelocity);
             } else if (event.key == 'a') {
-                this.leftPaddle.velocity = new Vec(0, paddleVelocity);
+                this.leftPaddle.velocity = new Vector(0, paddleVelocity);
             } else if (event.key == 'o' || event.code == 'ArrowUp') {
-                this.rightPaddle.velocity = new Vec(0, -paddleVelocity);
+                this.rightPaddle.velocity = new Vector(0, -paddleVelocity);
             } else if (event.key == 'l' || event.code == 'ArrowDown') {
-                this.rightPaddle.velocity = new Vec(0, paddleVelocity);
+                this.rightPaddle.velocity = new Vector(0, paddleVelocity);
             }
         });
 
         window.addEventListener('keyup', (event) => {
             if (event.key == 'q') {
-                this.leftPaddle.velocity = new Vec(0, 0);
+                this.leftPaddle.velocity = new Vector(0, 0);
             } else if (event.key == 'a') {
-                this.leftPaddle.velocity = new Vec(0, 0);
+                this.leftPaddle.velocity = new Vector(0, 0);
             } else if (event.key == 'o' || event.code == 'ArrowUp') {
-                this.rightPaddle.velocity = new Vec(0, 0);
+                this.rightPaddle.velocity = new Vector(0, 0);
             } else if (event.key == 'l' || event.code == 'ArrowDown') {
-                this.rightPaddle.velocity = new Vec(0, 0);
+                this.rightPaddle.velocity = new Vector(0, 0);
             }
 
             if (event.key == 's' && !this.box.inPlay) {
@@ -200,3 +214,6 @@ function drawScene(newTime) {
     oldTime = newTime;
     requestAnimationFrame(drawScene);
 }
+
+
+//main();

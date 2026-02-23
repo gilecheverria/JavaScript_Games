@@ -47,5 +47,8 @@ function drawScene() {
     // Update the properties of the object
     //box.x += box.speed * box.direction;
 
+    // Bounce back and forth
+
+
     requestAnimationFrame(drawScene);
 }
