@@ -44,20 +44,18 @@ function drawScene() {
     drawAxes();
 
     // Update the offset to rotate around the center
-    let offsetX = canvasWidth / 2;
-    let offsetY = canvasHeight / 2;
+    // TODO: Set different coordinates for the center of rotation
+    let offsetX = 0;
+    let offsetY = 0;
 
 
-    // Draw the box
+    // Draw the axis
     ctx.fillStyle = box.color;
-    ctx.fillRect(box.x - box.size / 2, box.y - box.size / 2, box.size, box.size);
+    ctx.fillRect(box.x + offsetX, box.y + offsetY, box.size, box.size);
 
     // Update vales for next frame
     angle += 0.1;
-
-    // Make the cube move in a circle
-    //box.x = ???
-    //box.y = ???
+    // TODO: Use mathematical functions to set the actual position of the object
 
     requestAnimationFrame(drawScene);
 }

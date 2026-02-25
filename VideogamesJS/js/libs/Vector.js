@@ -5,6 +5,8 @@
  * 2026-02-10
  */
 
+// TODO: Complete the methods in this class to be able to perform vector operations
+
 class Vector {
     constructor(x, y) {
         this.x = x;
@@ -12,23 +14,23 @@ class Vector {
     }
 
     plus(other) {
-        return new Vector(this.x + other.x, this.y + other.y);
+        return new Vector(0, 0);
     }
 
     minus(other) {
-        return new Vector(this.x - other.x, this.y - other.y);
+        return new Vector(0, 0);
     }
 
     times(scalar) {
-        return new Vector(this.x * scalar, this.y * scalar);
+        return new Vector(0, 0);
     }
 
     magnitude() {
-        return Math.sqrt(this.x ** 2 + this.y ** 2);
+        return 0;
     }
 
     squareLength() {
-        return this.x ** 2 + this.y ** 2;
+        return 0;
     }
 
     normalize() {
