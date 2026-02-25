@@ -1,5 +1,5 @@
 /*
- * Class for the base Game Object used for all the actors in a scene
+ * Class for the base Game Object used for all the actors in a scene.
  *
  * The position of the object is its center.
  *
@@ -75,14 +75,8 @@ export class GameObject {
         if (this.spriteImage) {
             if (this.spriteRect) {
                 ctx.drawImage(this.spriteImage,
-                    // Animated objects need this version to correctly
-                    // take the correct sprite
-                              this.spriteRect.x * this.spriteRect.width,
-                              this.spriteRect.y * this.spriteRect.height,
-                    // The BULLET HELL example needs this version,
-                    // since it does not use animation
-                              //this.spriteRect.x,
-                              //this.spriteRect.y,
+                              this.spriteRect.x,
+                              this.spriteRect.y,
                               this.spriteRect.width,
                               this.spriteRect.height,
                               (this.position.x - this.halfSize.x * this.scale),

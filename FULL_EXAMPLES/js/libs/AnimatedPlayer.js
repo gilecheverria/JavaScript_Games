@@ -129,5 +129,4 @@ export class AnimatedPlayer extends AnimatedObject {
         this.setAnimation(...dirData.idleFrames, dirData.repeat, dirData.duration);
     }
 
-
 }
