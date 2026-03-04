@@ -25,14 +25,15 @@ window.addEventListener('keydown', event => {
 
 
 export class GameObject {
-    constructor(position, width, height, color, type) {
+    // Using object destructuring to make parameters more readable and easier to use
+    constructor( { position, width, height, color, type, scale=1.0 } ) {
         this.position = position;
         this.size = new Vector(width, height);
         this.halfSize = new Vector(width / 2, height / 2);
         this.color = color;
         this.type = type;
         // Default scale for all new objects
-        this.scale = 1.0;
+        this.scale = scale;
 
         // Sprite properties
         this.spriteImage = undefined;
@@ -40,6 +41,13 @@ export class GameObject {
 
         // Intialize a collider with the default object size
         this.setCollider(width, height);
+
+        /*
+        if (this.type == "player") {
+            console.log("Player created:");
+            console.log(this);
+        }
+        */
     }
 
     setSprite(imagePath, rect) {
@@ -48,10 +56,6 @@ export class GameObject {
         if (rect) {
             this.spriteRect = rect;
         }
-    }
-
-    setScale(scale) {
-        this.scale = scale;
     }
 
     setCollider(width, height) {

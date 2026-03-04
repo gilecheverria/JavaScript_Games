@@ -10,8 +10,14 @@ import { GameObject } from "./GameObject.js";
 
 // Class for the bullets
 export class Bullet extends GameObject {
-    constructor(position, width, height, color, speed) {
-        super(position, width, height, color, "bullet");
+    constructor( { position, width, height, color, speed } ) {
+        super( {
+            position: position,
+            width: width,
+            height: height,
+            color: color,
+            type: "bullet"
+        } );
         this.velocity = new Vector(0, 0);
         this.destroy = false;
         this.speed = speed;

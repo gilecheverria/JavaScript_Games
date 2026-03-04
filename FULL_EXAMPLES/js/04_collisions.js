@@ -9,7 +9,7 @@
 
 import { Vector } from "./libs/Vector";
 import { GameObject } from "./libs/GameObject";
-import { boxOverlap } from "./libs/game_functions";
+import { objectOverlap } from "./libs/game_functions";
 
 // Global variables
 const canvasWidth = 800;
@@ -28,8 +28,12 @@ let playerSpeed = 0.5;
 
 // Class for the main character in the game
 class Player extends GameObject {
-    constructor(position, width, height, color) {
-        super(position, width, height, color, "player");
+    constructor( { position, width, height, color } ) {
+        super( { position: position,
+            width: width,
+            height: height,
+            color: color,
+            type: "player" } );
         this.velocity = new Vector(0, 0);
     }
 
@@ -37,22 +41,25 @@ class Player extends GameObject {
         this.position = this.position.plus(this.velocity.times(deltaTime));
 
         this.clampWithinCanvas();
-        this.updateCollider();
+        //this.updateCollider();
     }
 
     clampWithinCanvas() {
-        if (this.position.y < 0) {
-            this.position.y = 0;
-        } else if (this.position.y > canvasHeight) {
-            this.position.y = canvasHeight;
-        //} else if (this.position.y + this.height > canvasHeight) {
-            //this.position.y = canvasHeight - this.height;
-        } else if (this.position.x < 0) {
-            this.position.x = 0;
-        } else if (this.position.x > canvasWidth) {
-            this.position.x = canvasWidth;
-        //} else if (this.position.x + this.width > canvasWidth) {
-            //this.position.x = canvasWidth - this.width;
+        // Top border
+        if (this.position.y - this.halfSize.y < 0) {
+            this.position.y = this.halfSize.y;
+        // Left border
+        }
+        if (this.position.x - this.halfSize.x < 0) {
+            this.position.x = this.halfSize.x;
+        // Bottom border
+        }
+        if (this.position.y + this.halfSize.y > canvasHeight) {
+            this.position.y = canvasHeight - this.halfSize.y;
+        // Right border
+        }
+        if (this.position.x + this.halfSize.x > canvasWidth) {
+            this.position.x = canvasWidth - this.halfSize.x;
         }
     }
 }
@@ -70,16 +77,18 @@ class Game {
         const obstacleSize = 80;
 
         // Create the player object
-        this.player = new Player(new Vector(canvasWidth / 2, canvasHeight / 2),
-                                 playerSize, playerSize, "green");
+        this.player = new Player( {
+            position: new Vector(canvasWidth / 2, canvasHeight / 2),
+            width: playerSize, height: playerSize, color: "green"
+        } );
 
         // Create the obstacle objects
         this.actors = [];
-        const box1 = new GameObject(new Vector(300, 300),
-                                    obstacleSize, obstacleSize, "grey");
+        const box1 = new GameObject( { position: new Vector(300, 300),
+            width: obstacleSize, height: obstacleSize, color: "grey" } );
         this.actors.push(box1);
-        const box2 = new GameObject(new Vector(600, 500),
-                                    obstacleSize, obstacleSize, "grey");
+        const box2 = new GameObject( { position: new Vector(600, 500),
+            width: obstacleSize, height: obstacleSize, color: "grey" } );
         this.actors.push(box2);
     }
 
@@ -96,7 +105,12 @@ class Game {
 
         // Check collision against other objects
         for (let actor of this.actors) {
-            if (boxOverlap(this.player.collider, actor.collider)) {
+            // Naive collision detection, using the distances between objects
+            //if (this.player.position.minus(actor.position).magnitude() < 70) {
+            // Collision detection between the objects
+            if (objectOverlap(this.player, actor)) {
+            // Collision detection using the colliders
+            //if (boxOverlap(this.player.collider, actor.collider)) {
                 actor.color = "yellow";
             } else {
                 actor.color = "grey";

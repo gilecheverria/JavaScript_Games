@@ -9,11 +9,20 @@ import { Vector } from "./Vector.js";
 import { GameObject } from "./GameObject.js";
 
 export class Player extends GameObject {
-    constructor(position, width, height, color) {
-        super(position, width, height, color, "player");
+    // Using object destructuring to make parameters more readable and easier to use
+    constructor( { position, width, height, color } ) {
+        super( { position: position,
+            width: width,
+            height: height,
+            color: color,
+            type: "player"
+        } );
         this.velocity = new Vector(0, 0);
         // Default value for player speed
         this.speed = 1.0;
+
+        // Keys pressed to move the player
+        this.keys = [];
 
         // Data structure with the directions a character can move and the
         // direction sign.
@@ -35,9 +44,6 @@ export class Player extends GameObject {
                 sign: 1,
             },
         }
-
-        // Keys pressed to move the player
-        this.keys = [];
     }
 
     update(deltaTime, canvas) {
@@ -62,14 +68,21 @@ export class Player extends GameObject {
     }
 
     clampWithinCanvas(canvas) {
-        if (this.position.y < 0) {
-            this.position.y = 0;
-        } else if (this.position.y > canvas.height) {
-            this.position.y = canvas.height;
-        } else if (this.position.x < 0) {
-            this.position.x = 0;
-        } else if (this.position.x > canvas.width) {
-            this.position.x = canvas.width;
+        // Top border
+        if (this.position.y - this.halfSize.y < 0) {
+            this.position.y = this.halfSize.y;
+        // Left border
+        }
+        if (this.position.x - this.halfSize.x < 0) {
+            this.position.x = this.halfSize.x;
+        // Bottom border
+        }
+        if (this.position.y + this.halfSize.y > canvas.height) {
+            this.position.y = canvas.height - this.halfSize.y;
+        // Right border
+        }
+        if (this.position.x + this.halfSize.x > canvas.width) {
+            this.position.x = canvas.width - this.halfSize.x;
         }
     }
 

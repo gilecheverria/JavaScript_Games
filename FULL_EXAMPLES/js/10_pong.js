@@ -32,8 +32,14 @@ let game;
 
 // Clases for the Pong game
 class Ball extends GameObject {
-    constructor(position, width, height, color) {
-        super(position, width, height, color, "ball");
+    constructor( { position, width, height, color } ) {
+        super( {
+            position: position,
+            width: width,
+            height: height,
+            color: color,
+            type: "ball"
+        } );
         this.reset();
     }
 
@@ -59,8 +65,14 @@ class Ball extends GameObject {
 }
 
 class Paddle extends GameObject {
-    constructor(position, width, height, color) {
-        super(position, width, height, color, "paddle");
+    constructor( { position, width, height, color } ) {
+        super( {
+            position: position,
+            width: width,
+            height: height,
+            color: color,
+            type: "paddle"
+        } );
         this.velocity = new Vector(0.0, 0.0);
     }
 
@@ -80,16 +92,55 @@ class Paddle extends GameObject {
 class Game {
     constructor(canvasWidth, canvasHeight) {
         // An object to represent the box to be displayed
-        this.box = new Ball(new Vector(canvasWidth / 2, canvasHeight / 2), 20, 20, "red");
+        this.box = new Ball( {
+            position: new Vector(canvasWidth / 2, canvasHeight / 2),
+            width: 20,
+            height: 20,
+            color: "red"
+        } );
         // The paddles that will be controlled by the players
-        this.leftPaddle = new Paddle(new Vector(30, canvasHeight / 2), 20, 100, "blue");
-        this.rightPaddle = new Paddle(new Vector(canvasWidth - 50, canvasHeight / 2), 20, 100, "blue");
+        this.leftPaddle = new Paddle( {
+            position: new Vector(30, canvasHeight / 2),
+            width: 20,
+            height: 100,
+            color: "blue"
+        });
+        this.rightPaddle = new Paddle( {
+            position: new Vector(canvasWidth - 50, canvasHeight / 2),
+            width: 20,
+            height: 100,
+            color: "blue"
+        });
         // Top and bottom bars where the ball can bounce
-        this.topBar = new GameObject(new Vector(canvasWidth / 2, 0), canvasWidth, 20, "black", "obstacle");
-        this.bottomBar = new GameObject(new Vector(canvasWidth / 2, canvasHeight - 20), canvasWidth, 20, "black", "obstacle");
+        this.topBar = new GameObject( {
+            position: new Vector(canvasWidth / 2, 0),
+            width: canvasWidth,
+            height: 20,
+            color: "black",
+            type: "obstacle"
+        });
+        this.bottomBar = new GameObject( {
+            position: new Vector(canvasWidth / 2, canvasHeight - 20),
+            width: canvasWidth,
+            height: 20,
+            color: "black",
+            type: "obstacle"
+        });
         // Goals on the sides. If the ball touches them a player scores
-        this.leftGoal = new GameObject(new Vector(8, canvasHeight / 2), 6, canvasHeight, "green", "leftGoal");
-        this.rightGoal = new GameObject(new Vector(canvasWidth - 8, canvasHeight / 2), 6, canvasHeight, "green", "rightGoal");
+        this.leftGoal = new GameObject( {
+            position: new Vector(8, canvasHeight / 2),
+            width: 6,
+            height: canvasHeight,
+            color: "green",
+            type: "leftGoal"
+        });
+        this.rightGoal = new GameObject( {
+            position: new Vector(canvasWidth - 8, canvasHeight / 2),
+            width: 6,
+            height: canvasHeight,
+            color: "green",
+            type: "rightGoal"
+        });
         // Text labels to show the game score
         this.leftLabel = new TextLabel(200, 100, "40px Ubuntu Mono", "white")
         this.rightLabel = new TextLabel(600, 100, "40px Ubuntu Mono", "white")

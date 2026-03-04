@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Top down adventure</title>
+        <link rel="stylesheet" href="../css/styles.css">
+        <script src="../js/40_top_down.js" type="module"></script>
+    </head>
+
+    <body>
+        <div id="headerContainer">
+            <h1>Top down adventure</h1>
+        </div>
+        <canvas id="canvas"></canvas>
+        <div id="scaleValue">Scale: 29</div>
+        <div>
+            <input type="range" min="1" max="50" value="29"
+                class="slider" id="myRange"
+                onchange="updateSlider(this.value)">
+        </div>
+        <a href="/">
+            <button id="backButton">Back</button>
+        </a>
+    </body>
+</html>

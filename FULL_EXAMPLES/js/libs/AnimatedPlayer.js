@@ -10,56 +10,27 @@ import { Vector } from "./Vector.js";
 import { AnimatedObject } from "./AnimatedObject.js";
 
 export class AnimatedPlayer extends AnimatedObject {
-    constructor(position, width, height, color, sheetCols) {
-        super(position, width, height, color, "player", sheetCols);
+    constructor( { position, width, height, color, scale=1.0, sheetCols, motion } ) {
+        super( {
+            position: position,
+            width: width,
+            height: height,
+            color: color,
+            type: "player",
+            scale: scale,
+            sheetCols: sheetCols
+        } );
         this.velocity = new Vector(0, 0);
         // Default value for player speed
         this.speed = 1.0;
         this.sheetCols = sheetCols;
 
-        // Data structure with the directions a character can move and the
-        // direction sign.
-        this.motion = {
-            up: {
-                status: false,
-                axis: "y",
-                sign: -1,
-                repeat: true,
-                duration: 100,
-                moveFrames: [0, 2],
-                idleFrames: [1, 1],
-            },
-            left: {
-                status: false,
-                axis: "x",
-                sign: -1,
-                repeat: true,
-                duration: 100,
-                moveFrames: [9, 11],
-                idleFrames: [10, 10],
-            },
-            down: {
-                status: false,
-                axis: "y",
-                sign: 1,
-                repeat: true,
-                duration: 100,
-                moveFrames: [6, 8],
-                idleFrames: [7, 7],
-            },
-            right: {
-                status: false,
-                axis: "x",
-                sign: 1,
-                repeat: true,
-                duration: 100,
-                moveFrames: [3, 5],
-                idleFrames: [4, 4],
-            },
-        }
-
         // Keys pressed to move the player
         this.keys = [];
+
+        // Data structure with the directions a character can move, the
+        // direction sign and the related animation.
+        this.motion = motion;
     }
 
     update(deltaTime, canvas) {
@@ -95,14 +66,21 @@ export class AnimatedPlayer extends AnimatedObject {
     }
 
     clampWithinCanvas(canvas) {
-        if (this.position.y < 0) {
-            this.position.y = 0;
-        } else if (this.position.y > canvas.height) {
-            this.position.y = canvas.height;
-        } else if (this.position.x < 0) {
-            this.position.x = 0;
-        } else if (this.position.x > canvas.width) {
-            this.position.x = canvas.width;
+        // Top border
+        if (this.position.y - this.halfSize.y < 0) {
+            this.position.y = this.halfSize.y;
+        // Left border
+        }
+        if (this.position.x - this.halfSize.x < 0) {
+            this.position.x = this.halfSize.x;
+        // Bottom border
+        }
+        if (this.position.y + this.halfSize.y > canvas.height) {
+            this.position.y = canvas.height - this.halfSize.y;
+        // Right border
+        }
+        if (this.position.x + this.halfSize.x > canvas.width) {
+            this.position.x = canvas.width - this.halfSize.x;
         }
     }
 
@@ -117,7 +95,6 @@ export class AnimatedPlayer extends AnimatedObject {
         // Make changes only if the direction is different
         if (!dirData.status) {
             dirData.status = true;
-            //this.velocity[dirData.axis] = dirData.sign * playerSpeed;
             this.setAnimation(...dirData.moveFrames, dirData.repeat, dirData.duration);
         }
     }
@@ -125,7 +102,6 @@ export class AnimatedPlayer extends AnimatedObject {
     stopMovement(direction) {
         const dirData = this.motion[direction];
         dirData.status = false;
-        //this.velocity[dirData.axis] = 0;
         this.setAnimation(...dirData.idleFrames, dirData.repeat, dirData.duration);
     }
 

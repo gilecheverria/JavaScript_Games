@@ -12,8 +12,15 @@ import { GameObject } from "./GameObject";
 
 // Class to control the animation of characters and objects
 export class AnimatedObject extends GameObject {
-    constructor(position, width, height, color, type, sheetCols) {
-        super(position, width, height, color, type);
+    constructor( { position, width, height, color, type, scale=1.0, sheetCols } ) {
+        super( {
+            position: position,
+            width: width,
+            height: height,
+            color: color,
+            scale: scale,
+            type: type
+        } );
         // Animation properties
         this.frame = 0;
         this.minFrame = 0;

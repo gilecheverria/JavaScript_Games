@@ -1,16 +1,15 @@
 /*
- * Using sprites to draw more interesting game objects
+ * Using sprites to draw objects
  *
  * Gilberto Echeverria
- * 2026-02-22
+ * 2026-03-03
  */
 
 "use strict";
 
 import { Vector } from "./libs/Vector";
-import { Rect } from "./libs/Rect";
 import { GameObject } from "./libs/GameObject";
-import { AnimatedPlayer } from "./libs/AnimatedPlayer";
+import { Player } from "./libs/Player";
 import { boxOverlap, randomRange } from "./libs/game_functions";
 
 // Global variables
@@ -37,9 +36,19 @@ class Game {
     }
 
     initObjects() {
-        this.player = new AnimatedPlayer(new Vector(canvasWidth / 2, canvasHeight / 2), 60, 60, "red", 3);
-        this.player.setSprite('../assets/sprites/blordrough_quartermaster-NESW.png',
-                              new Rect(48, 128, 48, 64));
+        // Add another object to draw a background
+        this.background = new GameObject( {
+            position: new Vector(canvasWidth / 2, canvasHeight / 2),
+            width: canvasWidth,
+            height: canvasHeight
+        } );
+        this.background.setSprite("../assets/sprites/trak2_plate2b.png");
+
+        this.player = new Player( {
+            position: new Vector(canvasWidth / 2, canvasHeight / 2),
+            width: 60, height: 60, color: "red"
+        } );
+        this.player.setSprite("../assets/sprites/link_front.png");
         this.player.setSpeed(playerSpeed);
 
         this.actors = [];
@@ -49,11 +58,13 @@ class Game {
     }
 
     draw(ctx) {
+        // Draw the background first, so everything else is drawn on top
+        this.background.draw(ctx);
+
         for (let actor of this.actors) {
             actor.draw(ctx);
         }
         this.player.draw(ctx);
-        //console.log(`Current frame: ${this.player.frame}, repeating: ${this.player.repeat}`);
     }
 
     update(deltaTime) {
@@ -63,10 +74,8 @@ class Game {
         // Check collision against other objects
         for (let actor of this.actors) {
             if (boxOverlap(this.player.collider, actor.collider)) {
-                //actor.color = "yellow";
                 actor.setSprite('../assets/sprites/RTS_Crate_red.png');
             } else {
-                //actor.color = "grey";
                 actor.setSprite('../assets/sprites/RTS_Crate.png');
             }
         }
@@ -77,11 +86,13 @@ class Game {
         const size = randomRange(50, 50);
         const posX = randomRange(canvasWidth - size);
         const posY = randomRange(canvasHeight - size);
-        const box = new GameObject(new Vector(posX, posY), size, size, "grey");
-        // If we want to draw the whole sprite, no need to add a rect
-        box.setSprite('../assets/sprites/RTS_Crate.png');
-        //box.setSprite('../assets/sprites/RTS_Crate.png',
-        //                      new Rect(0, 0, 512, 512));
+        const box = new GameObject( {
+            position: new Vector(posX, posY),
+            width: size,
+            height: size,
+            color: "grey"
+        } );
+        box.setSprite("../assets/sprites/RTS_Crate.png");
         box.destroy = false;
         this.actors.push(box);
     }
@@ -90,32 +101,24 @@ class Game {
         window.addEventListener('keydown', (event) => {
             if (event.key == 'w') {
                 this.addKey('up');
-                this.player.startMovement('up');
             } else if (event.key == 'a') {
                 this.addKey('left');
-                this.player.startMovement('left');
             } else if (event.key == 's') {
                 this.addKey('down');
-                this.player.startMovement('down');
             } else if (event.key == 'd') {
                 this.addKey('right');
-                this.player.startMovement('right');
             }
         });
 
         window.addEventListener('keyup', (event) => {
             if (event.key == 'w') {
                 this.delKey('up');
-                this.player.stopMovement('up');
             } else if (event.key == 'a') {
                 this.delKey('left');
-                this.player.stopMovement('left');
             } else if (event.key == 's') {
                 this.delKey('down');
-                this.player.stopMovement('down');
             } else if (event.key == 'd') {
                 this.delKey('right');
-                this.player.stopMovement('right');
             }
         });
     }

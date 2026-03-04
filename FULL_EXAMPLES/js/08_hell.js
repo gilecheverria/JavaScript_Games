@@ -63,26 +63,41 @@ class Game {
     }
 
     initObjects() {
-        this.player = new Player(new Vector(canvasWidth / 2, canvasHeight / 4 * 3), 40, 40, "yellow");
+        this.player = new Player( {
+            position: new Vector(canvasWidth / 2, canvasHeight / 4 * 3),
+            width: 40,
+            height: 40,
+            color: "yellow",
+            scale: scale
+        } );
         this.player.setSprite("../assets/sprites/nightraidervertical.png");
         this.player.setCollider(20, 30);
         this.player.setSpeed(playerSpeed );
-        this.player.setScale(scale);
 
         this.actors = [];
         this.playerBullets = [];
         this.enemyBullets = [];
+
+        let enemy = new GameObject( {
+            position: new Vector(canvasWidth / 2, 100),
+            width: 80,
+            height: 80,
+            color: "red",
+            scale: scale
+        } );
+        enemy.setSprite("../assets/sprites/ship3.png");
+        this.actors.push(enemy);
     }
 
     draw(ctx) {
-        for (let actor of this.actors) {
-            actor.draw(ctx);
-        }
         for (let bullet of this.enemyBullets) {
             bullet.draw(ctx);
         }
         for (let bullet of this.playerBullets) {
             bullet.draw(ctx);
+        }
+        for (let actor of this.actors) {
+            actor.draw(ctx);
         }
         this.player.draw(ctx);
     }
@@ -103,6 +118,10 @@ class Game {
         }
         // Move the player
         this.player.update(deltaTime, ctx.canvas);
+
+        // Move the enemy
+        this.actors[0].position.x = canvasWidth / 2 + Math.cos(this.bulletAngle) * 100;
+        this.actors[0].updateCollider();
 
         this.checkCollisions();
 
@@ -126,8 +145,10 @@ class Game {
         if (this.bulletTimer > this.bulletDelay) {
             this.bulletAngle += this.bulletAngleIncrement;
             this.bulletTimer = 0;
-            let originX = canvasWidth / 2;
-            let originY = 100;
+            //let originX = canvasWidth / 2;
+            //let originY = 100;
+            let originX = this.actors[0].position.x;
+            let originY = this.actors[0].position.y;
 
             let destX = Math.cos(this.bulletAngle);
             let destY = Math.sin(this.bulletAngle);
@@ -144,7 +165,12 @@ class Game {
         const size = randomRange(50, 50);
         const posX = randomRange(canvasWidth - size);
         const posY = randomRange(canvasHeight - size);
-        const box = new GameObject(new Vector(posX, posY), size, size, "grey");
+        const box = new GameObject( {
+            position: new Vector(posX, posY),
+            width: size,
+            height: size,
+            color: "grey"
+        } );
         box.destroy = false;
         this.actors.push(box);
     }
@@ -216,7 +242,14 @@ class Game {
 
     // Instantiate a new bullet
     addBullet(clickX, clickY) {
-        const bullet = new Bullet(game.player.position, 6, 20, "purple", bulletSpeed * 4);
+        const bullet = new Bullet( {
+            position: game.player.position,
+            width: 6,
+            height: 20,
+            color: "purple",
+            speed: bulletSpeed * 4,
+            scale: scale
+        } );
         bullet.setSprite("../assets/sprites/beams.png",
                          new Rect(231, 221, 40, 66)); // Purple beams
         bullet.setCollider(6, 6);
@@ -225,18 +258,23 @@ class Game {
         const moveVector = new Vector(clickX, clickY).minus(bullet.position).normalize();
         bullet.setVelocity(moveVector.x, moveVector.y);
         bullet.setSpriteRotation(Math.PI / 2);
-        bullet.setScale(scale);
         game.playerBullets.push(bullet);
     }
 
     addEnemyBullet(originX, originY, destX, destY) {
-        const bullet = new Bullet(new Vector(originX, originY), 6, 12, "blue", bulletSpeed);
+        const bullet = new Bullet( {
+            position: new Vector(originX, originY),
+            width: 6,
+            height: 12,
+            color: "blue",
+            speed: bulletSpeed,
+            scale: scale
+        } );
         bullet.setSprite("../assets/sprites/beams.png",
                          new Rect(238, 96, 44, 92)); // Blue beams
         bullet.setCollider(6, 6);
         bullet.setVelocity(destX, destY);
         bullet.setSpriteRotation(Math.PI / 2);
-        bullet.setScale(scale);
         game.enemyBullets.push(bullet);
     }
 }

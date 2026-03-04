@@ -38,6 +38,10 @@ const keyDirections = {
     a: 'left',
     s: 'down',
     d: 'right',
+    ArrowUp: 'up',
+    ArrowLeft: 'left',
+    ArrowDown: 'down',
+    ArrowRight: 'right',
 };
 
 // Class to keep track of all the events and objects in the game
@@ -51,7 +55,12 @@ class Game {
     }
 
     initObjects() {
-        this.player = new Player(new Vector(canvasWidth / 2, canvasHeight / 2), 60, 60, "red");
+        this.player = new Player( {
+            position: new Vector(canvasWidth / 2, canvasHeight / 2),
+            width: 60,
+            height: 60,
+            color: "red"
+        } );
         this.player.setCollider(60, 60);
         this.player.setSpeed(playerSpeed);
         this.actors = [];
@@ -101,7 +110,12 @@ class Game {
         const size = randomRange(50, 50);
         const posX = randomRange(canvasWidth - size);
         const posY = randomRange(canvasHeight - size);
-        const box = new GameObject(new Vector(posX, posY), size, size, "grey");
+        const box = new GameObject( {
+            position: new Vector(posX, posY),
+            width: size,
+            height: size,
+            color: "grey"
+        } );
         box.destroy = false;
         this.actors.push(box);
     }
@@ -173,7 +187,13 @@ class Game {
 
     // Instantiate a new bullet
     addBullet(clickX, clickY) {
-        const bullet = new Bullet(game.player.position, 20, 6, "blue", bulletSpeed);
+        const bullet = new Bullet( {
+            position: game.player.position,
+            width: 20,
+            height: 6,
+            color: "blue",
+            speed: bulletSpeed
+        } );
         // Compute the direction for the bullet movement,
         // based on the position of the mouse
         const moveVector = new Vector(clickX, clickY).minus(bullet.position).normalize();

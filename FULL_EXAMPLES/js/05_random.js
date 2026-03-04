@@ -36,7 +36,10 @@ class Game {
     }
 
     initObjects() {
-        this.player = new Player(new Vector(canvasWidth / 2, canvasHeight / 2), 60, 60, "red");
+        this.player = new Player( {
+            position: new Vector(canvasWidth / 2, canvasHeight / 2),
+            width: 60, height: 60, color: "red"
+        } );
         this.player.setSpeed(playerSpeed);
 
         this.actors = [];
@@ -71,7 +74,12 @@ class Game {
         const size = randomRange(50, 50);
         const posX = randomRange(canvasWidth - size);
         const posY = randomRange(canvasHeight - size);
-        const box = new GameObject(new Vector(posX, posY), size, size, "grey");
+        const box = new GameObject( {
+            position: new Vector(posX, posY),
+            width: size,
+            height: size,
+            color: "grey"
+        } );
         box.destroy = false;
         this.actors.push(box);
     }
