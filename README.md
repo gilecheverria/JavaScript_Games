@@ -76,6 +76,9 @@ npx mocha test/<test_file> --reporter spec
 - https://www.sitepoint.com/3-great-javascript-canvas-games-examples/
 - https://codepen.io/FRADAR/pen/qBqLXyg
 
+**Great resource compilation:**
+- https://github.com/proyecto26/awesome-jsgames?tab=readme-ov-file
+
 
 ## TODO:
 - [ ] Separate the background layer from the objects in the `05_Platformer`
