@@ -107,7 +107,7 @@ class Game {
             position: new Vector(canvasWidth / 2, canvasHeight / 2),
             width: 60,
             height: 60,
-            color: "red",
+            //color: "red",
             scale: 0.9,
             sheetCols: 3,
             motion: playerMotion
@@ -143,13 +143,11 @@ class Game {
         // Check collision against other objects
         for (let actor of this.actors) {
             actor.updateFrame(deltaTime);
-            /*
             if (boxOverlap(this.player.collider, actor.collider)) {
-                //actor.setSprite('../assets/sprites/RTS_Crate_red.png');
+                actor.color = "gray";
             } else {
-                //actor.setSprite('../assets/sprites/RTS_Crate.png');
+                actor.color = undefined;
             }
-            */
         }
     }
 

@@ -38,6 +38,8 @@ export class GameObject {
         // Sprite properties
         this.spriteImage = undefined;
         this.spriteRect = undefined;
+        // Rotation of the object depending on the sprite used
+        this.spriteRotation = 0;  // radians (0 = no rotation)
 
         // Intialize a collider with the default object size
         this.setCollider(width, height);
@@ -76,6 +78,21 @@ export class GameObject {
     }
 
     draw(ctx) {
+        // Define variables for the dimensions of the object on screen
+        const w = this.size.x * this.scale;
+        const h = this.size.y * this.scale;
+        const cx = this.position.x;
+        const cy = this.position.y;
+        const rot = this.spriteRotation !== 0;
+
+        // Rotate the shape drawn, if the object is rotated
+        if (rot) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(this.spriteRotation);
+            ctx.translate(-w / 2, -h / 2);
+        }
+
         if (this.spriteImage) {
             if (this.spriteRect) {
                 ctx.drawImage(this.spriteImage,
@@ -83,23 +100,30 @@ export class GameObject {
                               this.spriteRect.y,
                               this.spriteRect.width,
                               this.spriteRect.height,
-                              (this.position.x - this.halfSize.x * this.scale),
-                              (this.position.y - this.halfSize.y * this.scale),
-                              this.size.x * this.scale,
-                              this.size.y * this.scale);
+                              rot ? 0 : (cx - w / 2),
+                              rot ? 0 : (cy - h / 2),
+                              w, h);
             } else {
                 ctx.drawImage(this.spriteImage,
-                              (this.position.x - this.halfSize.x * this.scale),
-                              (this.position.y - this.halfSize.y * this.scale),
-                              this.size.x * this.scale,
-                              this.size.y * this.scale);
+                              rot ? 0 : (cx - w / 2),
+                              rot ? 0 : (cy - h / 2),
+                              w, h);
+            }
+            // Add an overlay of color (mixing the color of the sprite and the color)
+            if (this.color) {
+                ctx.save();
+                ctx.globalAlpha = 0.35;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(rot ? 0 : (cx - w / 2), rot ? 0 : (cy - h / 2), w, h);
+                ctx.restore();
             }
         } else {
             ctx.fillStyle = this.color;
-            ctx.fillRect((this.position.x - this.halfSize.x * this.scale),
-                         (this.position.y - this.halfSize.y * this.scale),
-                         this.size.x * this.scale,
-                         this.size.y * this.scale);
+            ctx.fillRect(rot ? 0 : (cx - w / 2), rot ? 0 : (cy - h / 2), w, h);
+        }
+
+        if (rot) {
+            ctx.restore();
         }
 
         if (showBBox) this.drawBoundingBox(ctx);
@@ -107,39 +131,56 @@ export class GameObject {
     }
 
     drawBoundingBox(ctx) {
+        // Define variables for the dimensions of the object on screen
+        const w = this.size.x * this.scale;
+        const h = this.size.y * this.scale;
+        const cx = this.position.x;
+        const cy = this.position.y;
+        const rot = this.spriteRotation !== 0;
+
+        if (rot) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(this.spriteRotation);
+            ctx.translate(-w / 2, -h / 2);
+        }
+
         // Attempt to compose the overlay so it makes the image lighter
         ctx.globalCompositeOperation = "screen";
-        // A transparent layer on top
         ctx.fillStyle = "rgb(0.5, 0.5, 0.5, 0.3)";
-        ctx.fillRect((this.position.x - this.halfSize.x * this.scale),
-                     (this.position.y - this.halfSize.y * this.scale),
-                     this.size.x * this.scale,
-                     this.size.y * this.scale);
-        // Return to default composition type
+        ctx.fillRect(rot ? 0 : (cx - w / 2), rot ? 0 : (cy - h / 2), w, h);
         ctx.globalCompositeOperation = "source-over";
 
-        // Draw the bounding box of the sprite
         ctx.strokeStyle = "red";
         ctx.beginPath();
-        ctx.rect((this.position.x - this.halfSize.x * this.scale),
-                 (this.position.y - this.halfSize.y * this.scale),
-                 this.size.x * this.scale,
-                 this.size.y * this.scale);
+        ctx.rect(rot ? 0 : (cx - w / 2), rot ? 0 : (cy - h / 2), w, h);
         ctx.stroke();
 
-        // A dot in the center of the sprite
         ctx.fillStyle = "red";
-        ctx.fillRect(this.position.x - 2, this.position.y - 2, 4, 4);
+        ctx.fillRect(rot ? (w / 2 - 2) : (cx - 2), rot ? (h / 2 - 2) : (cy - 2), 4, 4);
+
+        if (rot) ctx.restore();
     }
 
     drawCollider(ctx) {
+        const rot = this.spriteRotation !== 0;
+
+        if (rot) {
+            ctx.save();
+            ctx.translate(this.position.x, this.position.y);
+            ctx.rotate(this.spriteRotation);
+            ctx.translate(this.collider.x - this.position.x, this.collider.y - this.position.y);
+        }
+
         ctx.strokeStyle = "white";
         ctx.beginPath();
-        ctx.rect(this.collider.x,
-                 this.collider.y,
+        ctx.rect(rot ? 0 : this.collider.x,
+                 rot ? 0 : this.collider.y,
                  this.collider.width,
                  this.collider.height);
         ctx.stroke();
+
+        if (rot) ctx.restore();
     }
 
     // Empty template for all GameObjects to be able to update

@@ -67,7 +67,7 @@ class Game {
             position: new Vector(canvasWidth / 2, canvasHeight / 4 * 3),
             width: 40,
             height: 40,
-            color: "yellow",
+            //color: "yellow",
             scale: scale
         } );
         this.player.setSprite("../assets/sprites/nightraidervertical.png");
@@ -82,10 +82,11 @@ class Game {
             position: new Vector(canvasWidth / 2, 100),
             width: 80,
             height: 80,
-            color: "red",
+            //color: "red",
             scale: scale
         } );
         enemy.setSprite("../assets/sprites/ship3.png");
+        enemy.spriteRotation = Math.PI;
         this.actors.push(enemy);
     }
 
@@ -179,11 +180,13 @@ class Game {
         // Check collision against other objects
         for (let actor of this.actors) {
             // With the player
+            /*
             if (boxOverlap(this.player.collider, actor.collider)) {
                 actor.color = "yellow";
             } else {
                 actor.color = "grey";
             }
+            */
         }
 
         // Enemy bullets with the player
@@ -257,7 +260,8 @@ class Game {
         // based on the position of the mouse
         const moveVector = new Vector(clickX, clickY).minus(bullet.position).normalize();
         bullet.setVelocity(moveVector.x, moveVector.y);
-        bullet.setSpriteRotation(Math.PI / 2);
+        //bullet.setSpriteRotation(0);
+        bullet.spriteRotation = Math.PI / 4;
         game.playerBullets.push(bullet);
     }
 
@@ -274,7 +278,7 @@ class Game {
                          new Rect(238, 96, 44, 92)); // Blue beams
         bullet.setCollider(6, 6);
         bullet.setVelocity(destX, destY);
-        bullet.setSpriteRotation(Math.PI / 2);
+        bullet.spriteRotation = Math.PI / 4;
         game.enemyBullets.push(bullet);
     }
 }

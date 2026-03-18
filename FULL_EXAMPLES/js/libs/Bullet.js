@@ -25,8 +25,6 @@ export class Bullet extends GameObject {
         // Bullets will dissapear after a limited time
         this.maxLife = 2000;
         this.lifeTime = 0;
-        // Rotation of the object depending on the sprite used
-        this.spriteRotation = 0;
     }
 
     setVelocity(dirX, dirY) {
