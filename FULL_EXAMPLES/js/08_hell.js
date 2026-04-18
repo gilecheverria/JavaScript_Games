@@ -63,6 +63,23 @@ class Game {
     }
 
     initObjects() {
+        // Lists for the objects in the scene
+        this.actors = [];
+        this.playerBullets = [];
+        this.enemyBullets = [];
+
+        // The background
+        this.bg = new GameObject( {
+            position: new Vector(canvasWidth / 2, canvasHeight / 2),
+            width: canvasWidth,
+            height: canvasHeight,
+            type: "bg",
+            scale: scale
+        });
+        this.bg.setSprite("../assets/sprites/dueling_stars.png");
+        //this.actors.push(bg);
+
+        // The player object
         this.player = new Player( {
             position: new Vector(canvasWidth / 2, canvasHeight / 4 * 3),
             width: 40,
@@ -74,15 +91,13 @@ class Game {
         this.player.setCollider(20, 30);
         this.player.setSpeed(playerSpeed );
 
-        this.actors = [];
-        this.playerBullets = [];
-        this.enemyBullets = [];
-
+        // The main enemy object
         let enemy = new GameObject( {
             position: new Vector(canvasWidth / 2, 100),
             width: 80,
             height: 80,
             //color: "red",
+            type: "enemy",
             scale: scale
         } );
         enemy.setSprite("../assets/sprites/ship3.png");
@@ -91,6 +106,9 @@ class Game {
     }
 
     draw(ctx) {
+        // Background image
+        this.bg.draw(ctx);
+
         for (let bullet of this.enemyBullets) {
             bullet.draw(ctx);
         }

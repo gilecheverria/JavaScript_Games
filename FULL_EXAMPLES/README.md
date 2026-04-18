@@ -4,6 +4,7 @@
 
 - https://www.lessmilk.com/
 - https://eloquentjavascript.net/16_game.html
+- https://jakesgordon.com/games/
 
 ## JavaScript Canvas function documentation
 
@@ -25,6 +26,9 @@
 
 - Mouse events:
     https://javascript.info/mouse-events-basics
+
+- 2D perspective racer:
+    - https://jakesgordon.com/writing/javascript-racer/
 
 ## Notes on JavaScript:
 
