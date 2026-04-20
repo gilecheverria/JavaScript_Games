@@ -136,9 +136,14 @@ class Game {
         this.newScore = false;
         this.scorePlayer = undefined;
 
+        // Game time: 2 minutes = 120 milliseconds
+        this.timeRemaining = 120000;
+
         // Text labels to show the game score
         this.labelLeft = new TextLabel(200, 100, "40px Ubuntu Mono", "red");
         this.labelRight = new TextLabel(600, 100, "40px Ubuntu Mono", "blue");
+        this.labelTime = new TextLabel(350, 80, "40px Ubuntu Mono", "yellow");
+        this.labelGameOver = new TextLabel(280, canvasHeight / 2, "60px Ubuntu Mono", "yellow");
 
         this.initObjects();
         this.initAudio();
@@ -240,6 +245,11 @@ class Game {
             return;
         }
 
+        this.timeRemaining -= deltaTime;
+        if (this.timeRemaining <= 0) {
+            this.timeRemaining = 0;
+        }
+
         // Update the positions of the objects
         this.ball.update(deltaTime);
         this.paddleLeft.update(deltaTime);
@@ -281,6 +291,13 @@ class Game {
         // Draw the background objects first
         this.labelLeft.draw(ctx, `${this.scoreLeft}`);
         this.labelRight.draw(ctx, `${this.scoreRight}`);
+        let mins = Math.floor(this.timeRemaining / 1000 / 60);
+        let secs = Math.floor(this.timeRemaining / 1000 % 60);
+        this.labelTime.draw(ctx, `${mins} : ${secs}`);
+
+        if (this.timeRemaining <= 0) {
+            this.labelGameOver.draw(ctx, `Game Over`);
+        }
 
         // Drall all actors in a loop
         for (let actor of this.actors) {
