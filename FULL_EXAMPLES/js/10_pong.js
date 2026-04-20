@@ -10,7 +10,7 @@
 import { Vector } from "./libs/Vector";
 import { GameObject } from "./libs/GameObject";
 import { TextLabel } from "./libs/TextLabel";
-import { boxOverlap } from "./libs/game_functions";
+import { boxOverlap, lerpColor } from "./libs/game_functions";
 
 // Global variables
 const canvasWidth = 800;
@@ -19,12 +19,13 @@ const canvasHeight = 600;
 // Variable to store the times for the frames
 let oldTime;
 
-// Global settings
-const paddleSpeed = 0.8;
-const speedIncrease = 1.05;
-const initialSpeed = 0.3;
-const flashDuration = 500;
-let flashElapsed = 0;
+// Global variables for the settings of the game
+const PADDLE_SPEED = 0.8;
+const SPEED_INCREASE = 1.05;
+const INITIAL_SPEED = 0.3;
+const FLASH_DURATION = 500;
+// Time limit in milliseconds  2 minutes = 120 milliseconds
+const GAME_TIME = 120000;
 
 // Context of the Canvas
 let ctx;
@@ -51,14 +52,17 @@ class Ball extends GameObject {
         this.updateCollider();
     }
 
+    // Start the ball motion
     serve() {
         this.inPlay = true;
+        // Get a random angle between -PI/2 and PI/2
         let angle = Math.random() * (Math.PI / 2) - (Math.PI / 4);
-        this.velocity = new Vector(Math.cos(angle), Math.sin(angle)).times(initialSpeed);
+        this.velocity = new Vector(Math.cos(angle), Math.sin(angle)).times(INITIAL_SPEED);
         // Select a random direction for the serve
         this.velocity.x *= (Math.random() < 0.5) ? 1 : -1;
     }
 
+    // Move the ball to the center, and stop its motion
     reset() {
         this.inPlay = false;
         this.position = new Vector(canvasWidth / 2, canvasHeight / 2);
@@ -103,7 +107,7 @@ class Paddle extends GameObject {
             this.velocity[axis] += sign;
         }
         // Multiply the velocity vector by the speed value
-        this.velocity = this.velocity.times(paddleSpeed);
+        this.velocity = this.velocity.times(PADDLE_SPEED);
         // Move the paddle
         this.position = this.position.plus(this.velocity.times(deltaTime));
 
@@ -136,8 +140,11 @@ class Game {
         this.newScore = false;
         this.scorePlayer = undefined;
 
-        // Game time: 2 minutes = 120 milliseconds
-        this.timeRemaining = 120000;
+        // Timer for the flash effect when scoring
+        this.flashElapsed = 0;
+
+        // Game time:
+        this.timeRemaining = GAME_TIME;
 
         // Text labels to show the game score
         this.labelLeft = new TextLabel(200, 100, "40px Ubuntu Mono", "red");
@@ -245,9 +252,14 @@ class Game {
             return;
         }
 
-        this.timeRemaining -= deltaTime;
-        if (this.timeRemaining <= 0) {
-            this.timeRemaining = 0;
+        if (this.ball.inPlay) {
+            // Update the time
+            this.timeRemaining -= deltaTime;
+            // Finish the game when time runs out
+            if (this.timeRemaining <= 0) {
+                this.timeRemaining = 0;
+                return;
+            }
         }
 
         // Update the positions of the objects
@@ -255,18 +267,22 @@ class Game {
         this.paddleLeft.update(deltaTime);
         this.paddleRight.update(deltaTime);
 
+        this.checkBallCollisions();
+    }
+
+    checkBallCollisions() {
         // Identify if the ball hits a paddle, then bounce back horizontally
         if (boxOverlap(this.ball.collider, this.paddleLeft.collider)
             || boxOverlap(this.ball.collider, this.paddleRight.collider)) {
             this.ball.velocity.x *= -1;
-            this.ball.velocity = this.ball.velocity.times(speedIncrease);
+            this.ball.velocity = this.ball.velocity.times(SPEED_INCREASE);
             this.ping.play();
         }
         // If the ball hits a wall, bounce back vertically
         if (boxOverlap(this.ball.collider, this.wallTop.collider)
             || boxOverlap(this.ball.collider, this.wallBottom.collider)) {
             this.ball.velocity.y *= -1;
-            this.ball.velocity = this.ball.velocity.times(speedIncrease);
+            this.ball.velocity = this.ball.velocity.times(SPEED_INCREASE);
             this.pong.play();
         }
         // Score when the ball hits a goal
@@ -308,33 +324,19 @@ class Game {
     // Function to change the color of the background,
     // depending on the side that scored
     flashScore(deltaTime) {
-        flashElapsed += deltaTime;
+        this.flashElapsed += deltaTime;
         // Stop the animation and restore the game when the animation time has ended
-        if (flashElapsed > flashDuration) {
-            flashElapsed = 0;
+        if (this.flashElapsed > FLASH_DURATION) {
+            this.flashElapsed = 0;
             this.ball.reset();
             this.newScore = false;
             this.bg.color = `rgb(0 0 0)`;
         } else {
             let targetColor = this.scorePlayer === "left" ? [200, 100, 100] : [100, 100, 200];
-            let newColor = this.lerpColor([0, 0, 0], targetColor, flashElapsed / flashDuration);
+            let newColor = lerpColor([0, 0, 0], targetColor, this.flashElapsed / FLASH_DURATION);
             this.bg.color = `rgb(${Math.floor(newColor[0])} ${Math.floor(newColor[1])} ${Math.floor(newColor[2])})`;
             //console.log(`new color: ${newColor} : ${this.bg.color}`);
         }
-    }
-
-    // Lerp a color.
-    // Receive two list of the three color values in RGB, and the t factor
-    lerpColor(startColor, targetColor, t) {
-        let newColor = [0, 0, 0];
-        for (let i in startColor) {
-            newColor[i] = this.lerpValue(startColor[i], targetColor[i], t);
-        }
-        return newColor;
-    }
-
-    lerpValue(startValue, targetValue, t) {
-        return startValue + (targetValue - startValue) * t;
     }
 
     createEventListeners() {
@@ -410,7 +412,6 @@ function drawScene(newTime) {
         oldTime = newTime;
     }
     let deltaTime = newTime - oldTime;
-    //console.log(`DeltaTime: ${deltaTime}`);
 
     // Clean the canvas so we can draw everything again
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);

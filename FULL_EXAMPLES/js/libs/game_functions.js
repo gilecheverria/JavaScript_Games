@@ -78,4 +78,38 @@ function randomRange(size, start) {
     return Math.floor(Math.random() * size) + ((start === undefined) ? 0 : start);
 }
 
-export { objectOverlap, boxOverlap, randomRange };
+/*
+ * Linear interpolation of a value given the start, end and time factor
+ *
+ * Arguments:
+ * - startValue
+ * - targetValue
+ * - t
+ *
+ * Returns:
+ * - A new interpolated value
+ */
+function lerpValue(startValue, targetValue, t) {
+    return startValue + (targetValue - startValue) * t;
+}
+
+/*
+ * Lerp a color.
+ *
+ * Arguments:
+ * - startColor: a list of three elements, representing a color in RGB
+ * - targetColor: a list of three elements, representing a color in RGB
+ * - t: elapsed time
+ *
+ * Returns:
+ * - A new list with the RGB values for a color
+ */
+function lerpColor(startColor, targetColor, t) {
+    let newColor = [0, 0, 0];
+    for (let i in startColor) {
+        newColor[i] = lerpValue(startColor[i], targetColor[i], t);
+    }
+    return newColor;
+}
+
+export { objectOverlap, boxOverlap, randomRange, lerpValue, lerpColor };
