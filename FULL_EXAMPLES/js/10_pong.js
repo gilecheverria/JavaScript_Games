@@ -20,12 +20,15 @@ const canvasHeight = 600;
 let oldTime;
 
 // Global variables for the settings of the game
+
 const PADDLE_SPEED = 0.8;
 const SPEED_INCREASE = 1.05;
 const INITIAL_SPEED = 0.3;
 const FLASH_DURATION = 500;
 // Time limit in milliseconds  2 minutes = 120 milliseconds
 const GAME_TIME = 120000;
+// Value to affect the direction of the ball when hitting the paddles
+const SPIN_FACTOR = 1.0;
 
 // Context of the Canvas
 let ctx;
@@ -271,13 +274,9 @@ class Game {
     }
 
     checkBallCollisions() {
-        // Identify if the ball hits a paddle, then bounce back horizontally
-        if (boxOverlap(this.ball.collider, this.paddleLeft.collider)
-            || boxOverlap(this.ball.collider, this.paddleRight.collider)) {
-            this.ball.velocity.x *= -1;
-            this.ball.velocity = this.ball.velocity.times(SPEED_INCREASE);
-            this.ping.play();
-        }
+        this.checkPaddleCollisions();
+        //this.checkPaddleCollisionsSimple();
+
         // If the ball hits a wall, bounce back vertically
         if (boxOverlap(this.ball.collider, this.wallTop.collider)
             || boxOverlap(this.ball.collider, this.wallBottom.collider)) {
@@ -297,6 +296,49 @@ class Game {
             this.scoreChime.play();
             this.newScore = true;
             this.scorePlayer = "left";
+        }
+    }
+
+    // Simple bounce off the paddles
+    checkPaddleCollisionsSimple() {
+        if (boxOverlap(this.ball.collider, this.paddleLeft.collider)
+            || boxOverlap(this.ball.collider, this.paddleRight.collider)) {
+            this.ball.velocity.x *= -1;
+            this.ball.velocity = this.ball.velocity.times(SPEED_INCREASE);
+            this.pong.play();
+        }
+    }
+
+    // More complex calculation of the bounce of the ball
+    // Currently not very predictable
+    checkPaddleCollisions() {
+        // Identify if the ball hits a paddle, then bounce back horizontally
+        let paddleHit = false;
+        let percent = 0;
+        let fromCenter = 0;
+        if (boxOverlap(this.ball.collider, this.paddleLeft.collider)) {
+            paddleHit = true;
+            // Modify the velocity in Y as well, depending on where the ball
+            // meets the paddle with respect to the paddle's center
+            fromCenter = (this.ball.position.y - this.paddleLeft.position.y);
+            percent = fromCenter / (this.paddleLeft.size.y / 2);
+        }
+        if (boxOverlap(this.ball.collider, this.paddleRight.collider)) {
+            paddleHit = true;
+            // Modify the velocity in Y as well, depending on where the ball
+            // meets the paddle with respect to the paddle's center
+            fromCenter = (this.ball.position.y - this.paddleRight.position.y);
+            percent = fromCenter / (this.paddleRight.size.y / 2);
+        }
+        if (paddleHit) {
+            this.ping.play();
+            //console.log(`hit velocity: ${this.ball.velocity.x},${this.ball.velocity.y}`)
+            this.ball.velocity.x *= -1;
+            //console.log(`fromCenter: ${fromCenter} | percent: ${percent} | increase: ${percent * SPIN_FACTOR}`);
+            this.ball.velocity.y += percent * SPIN_FACTOR;
+            //console.log(`bounce velocity: ${this.ball.velocity.x},${this.ball.velocity.y}`)
+            this.ball.velocity = this.ball.velocity.normalize();
+            //console.log(`bounce velocity final: ${this.ball.velocity.x},${this.ball.velocity.y}`)
         }
     }
 
